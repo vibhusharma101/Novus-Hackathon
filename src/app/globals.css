@@ -97,6 +97,7 @@
 
 /* ── EPRx color tokens ─────────────────────────────────── */
 :root {
+  color-scheme: light;
   --surface:                    #faf8ff;
   --surface-dim:                #d2d9f4;
   --surface-bright:             #faf8ff;
@@ -107,8 +108,8 @@
   --surface-container-highest:  #dae2fd;
   --on-surface:                 #131b2e;
   --on-surface-variant:         #3d4a42;
-  --inverse-surface:            #283044;
-  --inverse-on-surface:         #eef0ff;
+  --inverse-surface:            #303033;
+  --inverse-on-surface:         #f3f0f4;
   --outline:                    #6d7a72;
   --outline-variant:            #bccac0;
   --surface-tint:               #006c4a;
@@ -117,7 +118,7 @@
   --on-primary:                 #ffffff;
   --primary-container:          #00855d;
   --on-primary-container:       #f5fff7;
-  --inverse-primary:            #68dba9;
+  --inverse-primary:            #4edea3;
   --primary-fixed:              #85f8c4;
   --primary-fixed-dim:          #68dba9;
   --on-primary-fixed:           #002114;
@@ -128,10 +129,10 @@
   --secondary-container:        #6063ee;
   --on-secondary-container:     #fffbff;
 
-  --tertiary:                   #9b3e3b;
+  --tertiary:                   #855300;
   --on-tertiary:                #ffffff;
-  --tertiary-container:         #ba5551;
-  --on-tertiary-container:      #fffbff;
+  --tertiary-container:         #e29100;
+  --on-tertiary-container:      #523200;
 
   --error:                      #ba1a1a;
   --on-error:                   #ffffff;
@@ -140,7 +141,7 @@
 
   --background:                 #faf8ff;
   --on-background:              #131b2e;
-  --surface-variant:            #dae2fd;
+  --surface-variant:            #e4e1e6;
 }
 
 /* ── Utility classes from design system ────────────────── */
@@ -148,6 +149,10 @@
   .micro-grid {
     background-size: 20px 20px;
     background-image: radial-gradient(circle, #e2e8f0 1px, transparent 1px);
+  }
+  .blueprint-grid {
+    background-image: radial-gradient(circle, #e4e1e6 1px, transparent 1px);
+    background-size: 24px 24px;
   }
   .tonal-layer-1 {
     border: 1px solid #e2e8f0;
