@@ -17,7 +17,7 @@ export function Sidebar() {
   return (
     <aside className="w-56 shrink-0 border-r flex flex-col h-screen bg-muted/40">
       <div className="px-4 py-5 border-b">
-        <span className="font-semibold text-lg">Novus</span>
+        <span className="font-semibold text-lg">EPRx Exchange</span>
       </div>
 
       <nav className="flex-1 px-2 py-4 space-y-1">
