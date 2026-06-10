@@ -242,7 +242,7 @@ main ← release ← develop ← feature/phase-0-1-foundation
 The following screens have functional specs above but no HTML design reference yet.
 When designs arrive, update this list:
 
-- [ ] B2 — Buyer Onboarding form
+- [x] B2 — Buyer Onboarding form (built — `/onboarding/buyer`, design received)
 - [ ] B3 — 3-Step Calculator
 - [ ] B4 — Compliance Dashboard (donut widget)
 - [ ] B5 — Live Exchange / Order Book (authenticated)
@@ -255,3 +255,4 @@ When designs arrive, update this list:
 
 **Designs received:**
 - [x] B1 — Landing Page (desktop HTML — used as ground truth for `src/app/page.tsx`)
+- [x] B2 — Buyer Onboarding (HTML — built as `src/app/onboarding/buyer/page.tsx`)
