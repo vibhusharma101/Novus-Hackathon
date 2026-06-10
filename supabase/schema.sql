@@ -173,6 +173,33 @@ create policy "certificates: system inserts" on certificates
   for insert with check (true);
 
 -- ============================================================
+-- ROLE GRANTS
+-- Supabase API roles need table-level privileges; RLS (above) then filters
+-- rows. Without these grants every authed request fails with
+-- "permission denied for table ..." BEFORE policies are evaluated.
+-- (Tables created via a direct Postgres connection do not get the
+-- default Supabase grants, so we set them explicitly + for future tables.)
+-- ============================================================
+
+grant usage on schema public to anon, authenticated, service_role;
+
+grant select, insert, update, delete
+  on all tables in schema public
+  to anon, authenticated, service_role;
+
+grant usage, select
+  on all sequences in schema public
+  to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant select, insert, update, delete on tables
+  to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant usage, select on sequences
+  to anon, authenticated, service_role;
+
+-- ============================================================
 -- REALTIME
 -- Enable realtime for the two tables the demo syncs on
 -- ============================================================
