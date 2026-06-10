@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# vii-stack transient session files (durable artifacts like plan.md are committed)
+.vii/.current-session
+.vii/careful-acked-*
