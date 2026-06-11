@@ -59,7 +59,9 @@ export async function saveLiabilities(
   if (!userId) return { ok: false, error: 'You must be signed in.' }
 
   // Server-side validation — never trust the client
-  if (!items.length) return { ok: false, error: 'No categories provided.' }
+  if (!items.length || items.length > PLASTIC_CATEGORIES.length) {
+    return { ok: false, error: 'Invalid liability data.' }
+  }
   for (const item of items) {
     if (!PLASTIC_CATEGORIES.includes(item.category) || item.market_kg <= 0) {
       return { ok: false, error: 'Invalid liability data.' }
