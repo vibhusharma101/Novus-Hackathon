@@ -153,7 +153,8 @@ export function ComplianceDashboard({
               <div className="space-y-4">
                 {CAT_ORDER.map(cat => {
                   const liabilityKg = liabilityByCategory[cat] ?? 0
-                  const pct = liabilityKg > 0 ? Math.round((0 / liabilityKg) * 100) : 0
+                  // wire per-category secured kg here when orders land (B7)
+                  const pct = 0
                   return (
                     <div key={cat} className="space-y-1.5">
                       <div className="flex justify-between font-data text-[11px] uppercase tracking-tight">
