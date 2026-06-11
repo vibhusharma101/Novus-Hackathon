@@ -184,6 +184,20 @@
   animation: shake 0.2s ease-in-out 0s 2;
 }
 
+/* ── Print isolation: show only the element marked #cert-printable ─────────── */
+@media print {
+  body * { visibility: hidden; }
+  #cert-printable, #cert-printable * { visibility: visible; }
+  #cert-printable {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    box-shadow: none !important;
+    border-color: #18181b !important;
+  }
+}
+
 /* ── Base ───────────────────────────────────────────────── */
 @layer base {
   * {
