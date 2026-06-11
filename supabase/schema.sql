@@ -116,6 +116,10 @@ create policy "brands: own row" on brands
 create policy "recyclers: own row" on recyclers
   for all using (clerk_user_id = public.clerk_user_id());
 
+-- recyclers: any authenticated user can read public fields (needed for order book join)
+create policy "recyclers: public read" on recyclers
+  for select using (public.clerk_user_id() is not null);
+
 -- liabilities: brand owner only
 create policy "liabilities: brand owner" on liabilities
   for all using (
