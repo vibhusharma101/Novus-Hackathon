@@ -41,7 +41,7 @@ export function BuyerOnboardingForm() {
     }
     // Success — show confirmed state briefly, then advance to the calculator (B3).
     setDone(true)
-    router.push('/calculator')
+    router.push('/dashboard/calculator')
   }
 
   const busy = isSubmitting || done
