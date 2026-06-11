@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useTransition, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Package2, Layers, LayoutGrid, ShieldCheck,
   ArrowRight, ArrowLeft, X, Check, Loader2, Info,
+  TrendingUp, BarChart3, AlertTriangle,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -66,6 +67,12 @@ const LIQUIDITY_COLOR: Record<'HIGH' | 'MEDIUM' | 'EMERGING', string> = {
   HIGH: 'text-primary',
   MEDIUM: 'text-secondary',
   EMERGING: 'text-tertiary',
+}
+
+const CAT_CODES: Record<PlasticCategory, string> = {
+  rigid: 'P1-RIGID',
+  flexible: 'P2-FLEX',
+  mlp: 'P3-MLP',
 }
 
 // ─── Formatters ───────────────────────────────────────────────────────────────
@@ -700,6 +707,306 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
   )
 }
 
+// ─── Step 3: Compliance Results Ledger ───────────────────────────────────────
+
+interface Step3Props {
+  selected: Set<PlasticCategory>
+  weights: Record<PlasticCategory, string>
+  onBack: () => void
+  onGoToExchange: () => void
+}
+
+function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
+  const selectedCats = CATEGORIES.filter(c => selected.has(c.id))
+
+  const rows = selectedCats.map(cat => {
+    const kg = parseFloat(weights[cat.id]) || 0
+    const liabilityKg = calculateLiability(cat.id, kg)
+    const costRange = estimateCostRange(cat.id, liabilityKg)
+    return { ...cat, kg, liabilityKg, costRange }
+  })
+
+  const totalMarketKg = rows.reduce((s, r) => s + r.kg, 0)
+  const totalLiabilityKg = rows.reduce((s, r) => s + r.liabilityKg, 0)
+  const totalMinCost = rows.reduce((s, r) => s + r.costRange.min, 0)
+  const totalMaxCost = rows.reduce((s, r) => s + r.costRange.max, 0)
+  const platformFee = Math.round(totalMinCost * 0.05)
+  const avgRatePerKg =
+    totalLiabilityKg > 0
+      ? Math.round((totalMinCost + totalMaxCost) / 2 / totalLiabilityKg)
+      : 0
+
+  const calcId = useMemo(() => {
+    const year = new Date().getFullYear()
+    const rand = Math.random().toString(36).slice(2, 8).toUpperCase()
+    return `EPR-${year}-${rand}`
+  }, [])
+
+  return (
+    <div>
+      {/* Desktop progress header */}
+      <div className="hidden md:block mb-6">
+        <div className="flex justify-between items-end mb-4">
+          <div>
+            <span className="font-data text-[11px] text-primary uppercase tracking-widest block mb-1">
+              Liability Calculator
+            </span>
+            <h1 className="text-2xl font-['Geist'] font-semibold tracking-tight text-on-surface">
+              Compliance Results Ledger
+            </h1>
+          </div>
+          <span className="font-data text-sm text-on-surface-variant">
+            Step <span className="text-primary font-bold">3</span> / 3
+          </span>
+        </div>
+        <div className="h-1.5 w-full bg-[--color-border-zinc] rounded-full overflow-hidden">
+          <div className="h-full w-full bg-primary rounded-full transition-all duration-500 ease-out" />
+        </div>
+        <div className="flex justify-between mt-2">
+          <span className="font-data text-[11px] text-primary font-bold">Category</span>
+          <span className="font-data text-[11px] text-primary font-bold">Inventory</span>
+          <span className="font-data text-[11px] text-primary font-bold">Summary</span>
+        </div>
+      </div>
+
+      {/* Mobile header */}
+      <div className="md:hidden mb-6">
+        <div className="flex justify-between items-center mb-1">
+          <h1 className="text-2xl font-['Geist'] font-semibold tracking-tight text-on-surface">Results Ledger</h1>
+          <span className="font-data text-[11px] text-primary px-3 py-1 bg-success-emerald-light rounded-full font-semibold">
+            STEP 3 / 3
+          </span>
+        </div>
+        <p className="text-sm text-on-surface-variant">Final liability assessment based on your inventory inputs.</p>
+      </div>
+
+      <MobileStepDots step={3} />
+
+      {/* Bento summary cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        {/* Left: total liability (white card, 2-col on lg) */}
+        <div className="lg:col-span-2 bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg p-6 relative overflow-hidden flex flex-col justify-between">
+          <div className="relative z-10">
+            <p className="font-data text-[11px] text-on-surface-variant uppercase tracking-wider mb-4">
+              Final Computed Liability
+            </p>
+            <div className="flex items-baseline gap-3">
+              <span className="text-[42px] font-['Geist'] font-bold tracking-tight text-on-surface leading-none">
+                {intl.format(Math.round(totalLiabilityKg))}
+              </span>
+              <span className="font-data text-base text-on-surface-variant">kg</span>
+            </div>
+          </div>
+          <div className="mt-6 flex flex-wrap items-center gap-3 relative z-10">
+            <div className="flex items-center gap-2 px-3 py-1 bg-success-emerald-light text-primary rounded-full border border-primary/20">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              <span className="font-data text-[11px] font-semibold">CPCB VERIFIED LOGIC</span>
+            </div>
+            <span className="font-data text-[11px] text-on-surface-variant">ID: {calcId}</span>
+          </div>
+          <TrendingUp className="absolute -right-4 -top-4 h-32 w-32 text-on-surface opacity-[0.03] pointer-events-none" />
+        </div>
+
+        {/* Right: estimated cost (dark card) */}
+        <div className="bg-inverse-surface rounded-lg p-6 flex flex-col justify-between">
+          <div>
+            <p className="font-data text-[11px] text-zinc-400 uppercase tracking-wider mb-4">
+              Estimated Credit Cost
+            </p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-[28px] font-['Geist'] font-bold text-emerald-400 leading-none">
+                {fmtRs(totalMinCost)}
+              </span>
+            </div>
+            <span className="font-data text-xs text-zinc-500">to {fmtRs(totalMaxCost)}</span>
+          </div>
+          <div className="mt-6 space-y-2">
+            <div className="flex justify-between font-data text-[11px]">
+              <span className="text-zinc-400">Avg. Market Rate</span>
+              <span className="text-white font-bold">{fmtRs(avgRatePerKg)} / kg</span>
+            </div>
+            <div className="flex justify-between font-data text-[11px]">
+              <span className="text-zinc-400">Platform Fee (5%)</span>
+              <span className="text-white font-bold">{fmtRs(platformFee)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile: 2-col info bento */}
+      <div className="md:hidden grid grid-cols-2 gap-3 mb-6">
+        <div className="bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg p-4">
+          <p className="font-data text-[11px] text-on-surface-variant uppercase tracking-wide mb-1">Plastic Types</p>
+          <p className="text-sm font-semibold text-on-surface leading-snug">
+            {selectedCats.map(c => c.label).join(', ')}
+          </p>
+        </div>
+        <div className="bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg p-4">
+          <p className="font-data text-[11px] text-on-surface-variant uppercase tracking-wide mb-1">Period</p>
+          <p className="text-sm font-semibold text-on-surface">FY 2024–25</p>
+        </div>
+      </div>
+
+      {/* Detailed category ledger */}
+      <div className="bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg overflow-hidden shadow-sm mb-6">
+        <div className="bg-slate-100 border-b border-[--color-border-zinc] px-6 py-3 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <BarChart3 className="h-4 w-4 text-on-surface-variant" />
+            <span className="font-data text-sm font-bold text-on-surface tracking-wide">
+              DETAILED CATEGORY LEDGER
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="hidden md:block px-2 py-0.5 bg-zinc-200 rounded font-data text-[10px] text-on-surface-variant hover:bg-zinc-300 transition-colors"
+          >
+            PDF_REPORT
+          </button>
+        </div>
+
+        <div className="overflow-x-auto micro-grid">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-[--color-border-zinc]">
+                <th className="hidden md:table-cell px-6 py-4 font-data text-[11px] text-on-surface-variant uppercase tracking-wider bg-slate-50/80">
+                  Category Code
+                </th>
+                <th className="px-6 py-4 font-data text-[11px] text-on-surface-variant uppercase tracking-wider bg-slate-50/80">
+                  Packaging Material
+                </th>
+                <th className="hidden md:table-cell px-6 py-4 font-data text-[11px] text-on-surface-variant uppercase tracking-wider bg-slate-50/80 text-right">
+                  Market Volume (kg)
+                </th>
+                <th className="hidden md:table-cell px-6 py-4 font-data text-[11px] text-on-surface-variant uppercase tracking-wider bg-slate-50/80 text-right">
+                  Target %
+                </th>
+                <th className="px-6 py-4 font-data text-[11px] text-on-surface-variant uppercase tracking-wider bg-slate-50/80 text-right">
+                  Liability (kg)
+                </th>
+                <th className="md:hidden px-6 py-4 font-data text-[11px] text-on-surface-variant uppercase tracking-wider bg-slate-50/80 text-right">
+                  Est. Cost
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-100">
+              {rows.map(row => (
+                <tr key={row.id} className="hover:bg-primary/5 transition-colors">
+                  <td className="hidden md:table-cell px-6 py-4 font-data text-sm text-on-surface">
+                    {CAT_CODES[row.id]}
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold text-on-surface">{row.label}</span>
+                      <span className="font-data text-[11px] text-on-surface-variant">{row.tableSubtitle}</span>
+                    </div>
+                  </td>
+                  <td className="hidden md:table-cell px-6 py-4 font-data text-sm text-right text-on-surface">
+                    {intl.format(Math.round(row.kg))}
+                  </td>
+                  <td className="hidden md:table-cell px-6 py-4 font-data text-sm text-right text-on-surface">
+                    {row.targetPct}%
+                  </td>
+                  <td className="px-6 py-4 font-data text-sm text-right font-semibold text-primary">
+                    {intl.format(Math.round(row.liabilityKg))}
+                  </td>
+                  <td className="md:hidden px-6 py-4 font-data text-sm text-right text-primary">
+                    {fmtRs(row.costRange.min)}
+                  </td>
+                </tr>
+              ))}
+              <tr className="bg-slate-50 border-t-2 border-[--color-border-zinc]">
+                <td className="hidden md:table-cell px-6 py-3 font-data text-[11px] text-on-surface-variant uppercase">
+                  Total
+                </td>
+                <td className="px-6 py-3 font-data text-sm font-bold text-on-surface">Total Deficit</td>
+                <td className="hidden md:table-cell px-6 py-3 font-data text-sm text-right text-on-surface">
+                  {intl.format(Math.round(totalMarketKg))}
+                </td>
+                <td className="hidden md:table-cell px-6 py-3" />
+                <td className="px-6 py-3 font-data text-sm text-right font-bold text-primary">
+                  {intl.format(Math.round(totalLiabilityKg))} kg
+                </td>
+                <td className="md:hidden px-6 py-3 font-data text-sm text-right font-bold text-primary">
+                  {fmtRs(totalMinCost)}+
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Penalty risk callout */}
+      <div className="mb-6 p-4 bg-[--color-risk-red]/5 border border-[--color-risk-red]/20 rounded-lg flex items-start gap-3">
+        <AlertTriangle className="h-5 w-5 text-[--color-risk-red] shrink-0 mt-0.5" />
+        <div>
+          <p className="text-sm font-semibold text-[--color-risk-red] mb-0.5">Penalty Risk</p>
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            Non-compliance with EPR targets may attract a penalty of up to{' '}
+            <span className="font-semibold text-on-surface">₹15,00,000</span> plus{' '}
+            <span className="font-semibold text-on-surface">₹10,000/day</span> until targets are resolved.
+            Offset your deficit on the exchange to remain compliant.
+          </p>
+        </div>
+      </div>
+
+      {/* Mobile disclaimer */}
+      <p className="md:hidden text-[11px] text-on-surface-variant leading-relaxed mb-4 italic">
+        Calculations are based on CPCB PWM Rules 2022. Market prices are indicative and subject to exchange
+        liquidity at the time of purchase.
+      </p>
+
+      {/* Desktop action bar */}
+      <div className="hidden md:flex border-t border-[--color-border-zinc] pt-6 items-center justify-between gap-4">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors text-sm group"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+          Back to Data Entry
+        </button>
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="px-5 py-2.5 border border-[--color-border-zinc] text-on-surface text-sm font-semibold rounded hover:bg-slate-50 transition-all active:scale-[0.98]"
+          >
+            Download Ledger
+          </button>
+          <button
+            type="button"
+            onClick={onGoToExchange}
+            className="px-8 py-2.5 bg-primary text-on-primary text-sm font-semibold rounded flex items-center gap-2 hover:bg-primary-container transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+          >
+            Go to Exchange to Offset Deficit
+            <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile sticky action bar */}
+      <div className="md:hidden sticky bottom-0 -mx-6 -mb-6 bg-surface/90 backdrop-blur-md border-t border-[--color-border-zinc] p-4 flex gap-3">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex items-center justify-center gap-2 px-4 h-12 border border-[--color-border-zinc] rounded-xl text-sm font-semibold text-on-surface hover:bg-zinc-100 transition-all"
+        >
+          <ArrowLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onGoToExchange}
+          className="flex-1 h-12 bg-primary text-on-primary text-sm font-semibold rounded-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
+        >
+          Proceed to Marketplace
+          <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  )
+}
+
 // ─── Wizard shell ─────────────────────────────────────────────────────────────
 
 export function CalculatorWizard() {
@@ -756,6 +1063,12 @@ export function CalculatorWizard() {
     )
   }
 
-  // Step 3 wired in when design arrives
-  return null
+  return (
+    <Step3
+      selected={selected}
+      weights={weights}
+      onBack={() => setStep(2)}
+      onGoToExchange={() => router.push('/dashboard/exchange')}
+    />
+  )
 }
