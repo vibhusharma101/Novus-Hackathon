@@ -36,11 +36,17 @@ create table if not exists recyclers (
   cpcb_reg_no     text not null unique,
   state           text not null,
   capacity_mt     numeric not null,
+  contact_name    text not null,
   whatsapp        text not null,
   doc_url         text,
   verified        boolean not null default false,
   created_at      timestamptz not null default now()
 );
+
+-- Backfill for databases created before contact_name existed (idempotent).
+-- Default '' satisfies the not-null constraint for any pre-existing rows;
+-- new inserts always supply a real value via the onboarding action.
+alter table recyclers add column if not exists contact_name text not null default '';
 
 -- Buyer liability per category (upserted after calculator)
 create table if not exists liabilities (
@@ -116,7 +122,9 @@ create policy "brands: own row" on brands
 create policy "recyclers: own row" on recyclers
   for all using (clerk_user_id = public.clerk_user_id());
 
--- recyclers: any authenticated user can read public fields (needed for order book join)
+-- recyclers: any authenticated user can read rows (needed for order book join).
+-- Column exposure is narrowed to the public subset by a column-level GRANT in
+-- the ROLE GRANTS section below — RLS gates rows, the grant gates columns.
 create policy "recyclers: public read" on recyclers
   for select using (public.clerk_user_id() is not null);
 
@@ -202,6 +210,23 @@ alter default privileges in schema public
 alter default privileges in schema public
   grant usage, select on sequences
   to anon, authenticated, service_role;
+
+-- ------------------------------------------------------------
+-- Column-level lockdown: recyclers
+-- RLS gates ROWS, not COLUMNS. The "recyclers: public read" policy lets any
+-- authenticated user select rows, and the blanket grant above would otherwise
+-- expose EVERY column — including the private clerk_user_id / whatsapp /
+-- contact_name / doc_url. Restrict the API roles' SELECT to the public subset
+-- (the same columns the public_recyclers view exposes). service_role keeps
+-- full access for server-side admin reads of a seller's own private fields.
+-- Run AFTER the blanket grant so this narrower grant takes effect.
+-- ------------------------------------------------------------
+
+revoke select on recyclers from anon, authenticated;
+
+grant select (id, company_name, state, cpcb_reg_no, capacity_mt, verified)
+  on recyclers
+  to anon, authenticated;
 
 -- ============================================================
 -- REALTIME
