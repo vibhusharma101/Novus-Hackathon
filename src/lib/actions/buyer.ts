@@ -3,6 +3,9 @@
 import { auth } from '@clerk/nextjs/server'
 import { createUserClient } from '@/lib/supabase'
 import { buyerProfileSchema, type BuyerProfileInput } from '@/lib/validators/buyer'
+import { calculateLiability } from '@/lib/epr/liability'
+import { TARGET_PCT, PLASTIC_CATEGORIES } from '@/lib/epr/constants'
+import type { PlasticCategory } from '@/lib/epr/constants'
 
 export type CreateBrandResult =
   | { ok: true }
@@ -41,6 +44,53 @@ export async function createBrandProfile(input: BuyerProfileInput): Promise<Crea
     }
     return { ok: false, error: 'Could not create your profile. Please try again.' }
   }
+
+  return { ok: true }
+}
+
+// ─── saveLiabilities ──────────────────────────────────────────────────────────
+
+export type SaveLiabilitiesResult = { ok: true } | { ok: false; error: string }
+
+export async function saveLiabilities(
+  items: { category: PlasticCategory; market_kg: number }[]
+): Promise<SaveLiabilitiesResult> {
+  const { userId } = await auth()
+  if (!userId) return { ok: false, error: 'You must be signed in.' }
+
+  // Server-side validation — never trust the client
+  if (!items.length) return { ok: false, error: 'No categories provided.' }
+  for (const item of items) {
+    if (!PLASTIC_CATEGORIES.includes(item.category) || item.market_kg <= 0) {
+      return { ok: false, error: 'Invalid liability data.' }
+    }
+  }
+
+  const supabase = await createUserClient()
+
+  // RLS returns only this user's brand
+  const { data: brand, error: brandError } = await supabase
+    .from('brands')
+    .select('id')
+    .single()
+
+  if (brandError || !brand) {
+    return { ok: false, error: 'Brand profile not found. Please complete onboarding first.' }
+  }
+
+  const rows = items.map(item => ({
+    brand_id: brand.id,
+    category: item.category,
+    market_kg: item.market_kg,
+    target_pct: TARGET_PCT[item.category],
+    liability_kg: calculateLiability(item.category, item.market_kg),
+  }))
+
+  const { error } = await supabase
+    .from('liabilities')
+    .upsert(rows, { onConflict: 'brand_id,category' })
+
+  if (error) return { ok: false, error: 'Could not save liabilities. Please try again.' }
 
   return { ok: true }
 }
