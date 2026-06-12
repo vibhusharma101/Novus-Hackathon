@@ -4,6 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 import { createUserClient } from '@/lib/supabase'
 import { sellerProfileSchema, type SellerProfileInput } from '@/lib/validators/seller'
 import { listingSchema, type ListingInput } from '@/lib/validators/listing'
+import { provisionalCertificateId } from '@/lib/epr/certificate'
+import type { PlasticCategory } from '@/lib/epr/constants'
 
 export type CreateRecyclerResult =
   | { ok: true }
@@ -111,4 +113,100 @@ export async function createListing(input: ListingInput): Promise<CreateListingR
   }
 
   return { ok: true, listingId: listing.id }
+}
+
+// ─── respondToOrder ───────────────────────────────────────────────────────────
+
+export type RespondOrderResult =
+  | { ok: true; status: 'transferred' | 'declined' }
+  | { ok: false; error: string }
+
+/**
+ * The recycler accepts (marks transferred) or declines an incoming order.
+ *
+ * Security: gates on auth, confirms the order belongs to the caller's recycler,
+ * and only transitions from 'pending'. The UPDATE is additionally enforced by
+ * the "orders: recycler updates" RLS policy. On accept, issues the final
+ * certificate using the same deterministic reference the buyer saw provisionally.
+ */
+export async function respondToOrder(input: {
+  orderId: string
+  action: 'accept' | 'decline'
+}): Promise<RespondOrderResult> {
+  const { userId } = await auth()
+  if (!userId) return { ok: false, error: 'You must be signed in.' }
+
+  const { orderId, action } = input
+  if (typeof orderId !== 'string' || orderId.length < 32) {
+    return { ok: false, error: 'Invalid order reference.' }
+  }
+  if (action !== 'accept' && action !== 'decline') {
+    return { ok: false, error: 'Invalid action.' }
+  }
+
+  const supabase = await createUserClient()
+
+  // Confirm the caller is a recycler.
+  const { data: recycler } = await supabase.from('recyclers').select('id').single()
+  if (!recycler) return { ok: false, error: 'Recycler profile not found.' }
+
+  // Load the order (RLS lets the involved recycler read it).
+  const { data: order } = await supabase
+    .from('orders')
+    .select('id, recycler_id, status, category, created_at, expires_at')
+    .eq('id', orderId)
+    .maybeSingle<{
+      id: string
+      recycler_id: string
+      status: string
+      category: PlasticCategory
+      created_at: string
+      expires_at: string
+    }>()
+
+  if (!order || order.recycler_id !== recycler.id) {
+    return { ok: false, error: 'Order not found.' }
+  }
+  if (order.status !== 'pending') {
+    return { ok: false, error: 'This order has already been processed.' }
+  }
+  if (new Date(order.expires_at).getTime() < Date.now()) {
+    return { ok: false, error: 'This order has expired and can no longer be accepted.' }
+  }
+
+  const newStatus = action === 'accept' ? 'transferred' : 'declined'
+
+  // Update under RLS ("orders: recycler updates"). Re-assert pending to avoid a
+  // races double-processing.
+  const { data: updated, error: updateErr } = await supabase
+    .from('orders')
+    .update({ status: newStatus })
+    .eq('id', order.id)
+    .eq('status', 'pending')
+    .select('id')
+    .maybeSingle()
+
+  if (updateErr || !updated) {
+    return { ok: false, error: 'Could not update the order. Please try again.' }
+  }
+
+  // On accept, issue the final certificate — same deterministic reference the
+  // buyer already saw provisionally (B7), so the IDs line up.
+  if (action === 'accept') {
+    const referenceId = provisionalCertificateId(
+      order.category,
+      new Date(order.created_at),
+      order.id,
+    )
+    const { error: certErr } = await supabase
+      .from('certificates')
+      .insert({ order_id: order.id, reference_id: referenceId })
+
+    // 23505 = certificate already issued for this order → not an error.
+    if (certErr && certErr.code !== '23505') {
+      return { ok: false, error: 'Order accepted, but the certificate could not be issued.' }
+    }
+  }
+
+  return { ok: true, status: newStatus }
 }
