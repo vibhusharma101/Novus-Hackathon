@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils'
 import { calculateLiability, estimateCostRange } from '@/lib/epr/liability'
 import type { PlasticCategory } from '@/lib/epr/constants'
 import { saveLiabilities } from '@/lib/actions/buyer'
+import { AiEstimator } from '@/components/calculator/ai-estimator'
 
 // ─── Category metadata ────────────────────────────────────────────────────────
 
@@ -129,12 +130,13 @@ function MobileStepDots({ step }: { step: 1 | 2 | 3 }) {
 interface Step1Props {
   selected: Set<PlasticCategory>
   onToggle: (cat: PlasticCategory) => void
+  onEstimate: (est: Record<PlasticCategory, number>) => void
   onNext: () => void
   onCancel: () => void
   clock: string
 }
 
-function Step1({ selected, onToggle, onNext, onCancel, clock }: Step1Props) {
+function Step1({ selected, onToggle, onEstimate, onNext, onCancel, clock }: Step1Props) {
   const canProceed = selected.size > 0
 
   return (
@@ -168,6 +170,9 @@ function Step1({ selected, onToggle, onNext, onCancel, clock }: Step1Props) {
       </div>
 
       <MobileStepDots step={1} />
+
+      {/* AI estimator — optional, pre-fills categories + weights */}
+      <AiEstimator onEstimate={onEstimate} />
 
       {/* Category Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
@@ -1039,11 +1044,27 @@ export function CalculatorWizard() {
     setWeights(prev => ({ ...prev, [cat]: val }))
   }
 
+  // Applies an AI estimate: selects every category with a positive estimate and
+  // pre-fills its market-kg weight. Categories estimated at 0 are left unselected.
+  function applyEstimate(est: Record<PlasticCategory, number>) {
+    const next = new Set<PlasticCategory>()
+    const nextWeights: Record<PlasticCategory, string> = { rigid: '', flexible: '', mlp: '' }
+    for (const cat of ['rigid', 'flexible', 'mlp'] as PlasticCategory[]) {
+      if (est[cat] > 0) {
+        next.add(cat)
+        nextWeights[cat] = String(Math.round(est[cat]))
+      }
+    }
+    setSelected(next)
+    setWeights(nextWeights)
+  }
+
   if (step === 1) {
     return (
       <Step1
         selected={selected}
         onToggle={toggleCategory}
+        onEstimate={applyEstimate}
         onNext={() => setStep(2)}
         onCancel={() => router.push('/dashboard')}
         clock={clock}
