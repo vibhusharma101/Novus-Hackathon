@@ -198,8 +198,17 @@ create policy "certificates: buyer or recycler" on certificates
     )
   );
 
-create policy "certificates: system inserts" on certificates
-  for insert with check (true);
+-- Only the recycler fulfilling the order may issue its certificate. A blanket
+-- `with check (true)` would let any authenticated user pre-insert a certificate
+-- row for an order they don't own (griefing the reference_id), since respondToOrder
+-- treats a duplicate (23505) as already-issued. Scope the insert to the order's recycler.
+create policy "certificates: recycler of order inserts" on certificates
+  for insert with check (
+    order_id in (
+      select id from orders where
+        recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
+    )
+  );
 
 -- ============================================================
 -- ROLE GRANTS
