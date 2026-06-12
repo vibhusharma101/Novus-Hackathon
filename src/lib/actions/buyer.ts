@@ -125,7 +125,7 @@ export async function placeOrder(input: {
   // Derive buyer_id from RLS-scoped query — never from client input
   const { data: brand } = await supabase
     .from('brands')
-    .select('id, gstin')
+    .select('id, gstin, company_name')
     .single()
 
   if (!brand) return { ok: false, error: 'Brand profile not found. Please complete onboarding first.' }
@@ -162,6 +162,8 @@ export async function placeOrder(input: {
       credits_cost,
       platform_fee,
       total,
+      buyer_gstin:        brand.gstin,
+      buyer_company_name: brand.company_name,
       status:       'pending',
       expires_at,
     })
