@@ -69,6 +69,10 @@ export interface Order {
   credits_cost: number
   platform_fee: number
   total: number
+  // Denormalized from brands at order time so the recycler can display buyer
+  // identity + GSTIN without reading the buyer's RLS-protected brands row.
+  buyer_gstin: string | null
+  buyer_company_name: string | null
   status: OrderStatus
   expires_at: string
   created_at: string
