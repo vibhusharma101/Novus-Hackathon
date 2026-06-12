@@ -71,21 +71,31 @@ create table if not exists listings (
 );
 
 -- Orders (buyer purchases a listing)
+-- buyer_gstin / buyer_company_name are denormalized from brands at order time so
+-- the involved recycler (who cannot read the buyer's brands row under RLS) can see
+-- the GSTIN needed for the CPCB transfer + display the buyer name. Visibility is
+-- confined to the buyer + recycler by the "orders: buyer or recycler" policy.
 create table if not exists orders (
-  id              uuid primary key default gen_random_uuid(),
-  buyer_id        uuid not null references brands(id) on delete cascade,
-  recycler_id     uuid not null references recyclers(id) on delete cascade,
-  listing_id      uuid not null references listings(id) on delete cascade,
-  category        text not null check (category in ('rigid', 'flexible', 'mlp')),
-  qty_kg          numeric not null,
-  price_per_kg    numeric not null,
-  credits_cost    numeric not null,
-  platform_fee    numeric not null,
-  total           numeric not null,
-  status          text not null default 'pending' check (status in ('pending', 'transferred', 'declined', 'expired')),
-  expires_at      timestamptz not null,
-  created_at      timestamptz not null default now()
+  id                  uuid primary key default gen_random_uuid(),
+  buyer_id            uuid not null references brands(id) on delete cascade,
+  recycler_id         uuid not null references recyclers(id) on delete cascade,
+  listing_id          uuid not null references listings(id) on delete cascade,
+  category            text not null check (category in ('rigid', 'flexible', 'mlp')),
+  qty_kg              numeric not null,
+  price_per_kg        numeric not null,
+  credits_cost        numeric not null,
+  platform_fee        numeric not null,
+  total               numeric not null,
+  buyer_gstin         text,
+  buyer_company_name  text,
+  status              text not null default 'pending' check (status in ('pending', 'transferred', 'declined', 'expired')),
+  expires_at          timestamptz not null,
+  created_at          timestamptz not null default now()
 );
+
+-- Backfill for databases created before the denormalized buyer fields existed.
+alter table orders add column if not exists buyer_gstin        text;
+alter table orders add column if not exists buyer_company_name text;
 
 -- Certificates (one per completed order)
 create table if not exists certificates (
@@ -148,6 +158,13 @@ create policy "listings: recycler writes" on listings
 
 create policy "listings: recycler updates own" on listings
   for update using (
+    recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
+  );
+
+-- recycler can read ALL of its own listings (any status) for the inventory vault;
+-- the "read active" policy above only covers active listings for the public market.
+create policy "listings: recycler reads own" on listings
+  for select using (
     recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
