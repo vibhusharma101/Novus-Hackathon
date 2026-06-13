@@ -124,38 +124,48 @@ alter table listings    enable row level security;
 alter table orders      enable row level security;
 alter table certificates enable row level security;
 
+-- NOTE: Postgres has no CREATE POLICY IF NOT EXISTS, so each policy is dropped
+-- first to keep this whole file safely re-runnable (idempotent).
+
 -- brands: own row only
+drop policy if exists "brands: own row" on brands;
 create policy "brands: own row" on brands
   for all using (clerk_user_id = public.clerk_user_id());
 
 -- recyclers: own row only
+drop policy if exists "recyclers: own row" on recyclers;
 create policy "recyclers: own row" on recyclers
   for all using (clerk_user_id = public.clerk_user_id());
 
 -- recyclers: any authenticated user can read rows (needed for order book join).
 -- Column exposure is narrowed to the public subset by a column-level GRANT in
 -- the ROLE GRANTS section below — RLS gates rows, the grant gates columns.
+drop policy if exists "recyclers: public read" on recyclers;
 create policy "recyclers: public read" on recyclers
   for select using (public.clerk_user_id() is not null);
 
 -- liabilities: brand owner only
+drop policy if exists "liabilities: brand owner" on liabilities;
 create policy "liabilities: brand owner" on liabilities
   for all using (
     brand_id in (select id from brands where clerk_user_id = public.clerk_user_id())
   );
 
 -- listings: any authed user reads active listings; only owning recycler writes
+drop policy if exists "listings: read active" on listings;
 create policy "listings: read active" on listings
   for select using (
     public.clerk_user_id() is not null
     and status = 'active'
   );
 
+drop policy if exists "listings: recycler writes" on listings;
 create policy "listings: recycler writes" on listings
   for insert with check (
     recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
+drop policy if exists "listings: recycler updates own" on listings;
 create policy "listings: recycler updates own" on listings
   for update using (
     recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
@@ -163,12 +173,14 @@ create policy "listings: recycler updates own" on listings
 
 -- recycler can read ALL of its own listings (any status) for the inventory vault;
 -- the "read active" policy above only covers active listings for the public market.
+drop policy if exists "listings: recycler reads own" on listings;
 create policy "listings: recycler reads own" on listings
   for select using (
     recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
 -- orders: visible only to the buyer or the recycler involved
+drop policy if exists "orders: buyer or recycler" on orders;
 create policy "orders: buyer or recycler" on orders
   for select using (
     buyer_id   in (select id from brands    where clerk_user_id = public.clerk_user_id())
@@ -176,18 +188,21 @@ create policy "orders: buyer or recycler" on orders
     recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
+drop policy if exists "orders: buyer inserts" on orders;
 create policy "orders: buyer inserts" on orders
   for insert with check (
     buyer_id in (select id from brands where clerk_user_id = public.clerk_user_id())
   );
 
 -- only recycler can update status (accept/decline); system handles expired via cron
+drop policy if exists "orders: recycler updates" on orders;
 create policy "orders: recycler updates" on orders
   for update using (
     recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
 -- certificates: visible to buyer or recycler of the associated order
+drop policy if exists "certificates: buyer or recycler" on certificates;
 create policy "certificates: buyer or recycler" on certificates
   for select using (
     order_id in (
@@ -202,6 +217,9 @@ create policy "certificates: buyer or recycler" on certificates
 -- `with check (true)` would let any authenticated user pre-insert a certificate
 -- row for an order they don't own (griefing the reference_id), since respondToOrder
 -- treats a duplicate (23505) as already-issued. Scope the insert to the order's recycler.
+-- (Drop the old permissive policy name too, in case an earlier schema run created it.)
+drop policy if exists "certificates: system inserts" on certificates;
+drop policy if exists "certificates: recycler of order inserts" on certificates;
 create policy "certificates: recycler of order inserts" on certificates
   for insert with check (
     order_id in (
@@ -305,5 +323,21 @@ grant execute on function public.check_ai_rate_limit(text, integer, integer)
 -- Enable realtime for the two tables the demo syncs on
 -- ============================================================
 
-alter publication supabase_realtime add table listings;
-alter publication supabase_realtime add table orders;
+-- ALTER PUBLICATION ... ADD TABLE has no IF NOT EXISTS and errors if the table
+-- is already a member, so guard each add to keep this file re-runnable.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'listings'
+  ) then
+    alter publication supabase_realtime add table listings;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'orders'
+  ) then
+    alter publication supabase_realtime add table orders;
+  end if;
+end $$;
