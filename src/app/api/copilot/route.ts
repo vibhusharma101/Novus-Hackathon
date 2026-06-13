@@ -2,6 +2,7 @@ import { streamText, convertToModelMessages, validateUIMessages, type UIMessage 
 import { auth } from '@clerk/nextjs/server'
 import { createUserClient, supabaseAdmin } from '@/lib/supabase'
 import { model } from '@/lib/ai'
+import { checkRateLimit } from '@/lib/rate-limit'
 import type { PlasticCategory } from '@/lib/epr/constants'
 
 export const maxDuration = 30
@@ -25,6 +26,10 @@ const sanitize = (s: string) => s.replace(/[\r\n[\]]/g, ' ').slice(0, 120)
 export async function POST(request: Request) {
   const { userId } = await auth()
   if (!userId) return new Response('Unauthorized', { status: 401 })
+
+  if (!(await checkRateLimit(userId))) {
+    return new Response('Too many requests. Please slow down.', { status: 429 })
+  }
 
   let body: unknown
   try {

@@ -255,6 +255,52 @@ grant select (id, company_name, state, cpcb_reg_no, capacity_mt, verified)
   to anon, authenticated;
 
 -- ============================================================
+-- AI RATE LIMITING
+-- A shared, atomic fixed-window counter for the paid LLM endpoints
+-- (/api/copilot, /api/estimate-liability, /api/chat). Server-only: the table
+-- is RLS-locked (no policies → API roles see no rows; service_role bypasses
+-- RLS), and EXECUTE on the function is granted to service_role only.
+-- ============================================================
+
+create table if not exists ai_rate_limits (
+  clerk_user_id   text not null,
+  window_start    timestamptz not null,
+  count           integer not null default 0,
+  primary key (clerk_user_id, window_start)
+);
+
+alter table ai_rate_limits enable row level security;
+
+-- Atomically bump the caller's counter for the current fixed window and report
+-- whether they are still within the limit. Called only from the server via the
+-- service-role key (supabaseAdmin.rpc).
+create or replace function public.check_ai_rate_limit(
+  p_user text, p_limit integer, p_window_seconds integer
+) returns boolean
+  language plpgsql
+  as $$
+  declare
+    v_window timestamptz := to_timestamp(
+      floor(extract(epoch from now()) / p_window_seconds) * p_window_seconds
+    );
+    v_count integer;
+  begin
+    insert into ai_rate_limits (clerk_user_id, window_start, count)
+      values (p_user, v_window, 1)
+    on conflict (clerk_user_id, window_start)
+      do update set count = ai_rate_limits.count + 1
+    returning count into v_count;
+    return v_count <= p_limit;
+  end;
+  $$;
+
+-- Lock the function down to the server (service_role) only.
+revoke execute on function public.check_ai_rate_limit(text, integer, integer)
+  from public, anon, authenticated;
+grant execute on function public.check_ai_rate_limit(text, integer, integer)
+  to service_role;
+
+-- ============================================================
 -- REALTIME
 -- Enable realtime for the two tables the demo syncs on
 -- ============================================================
