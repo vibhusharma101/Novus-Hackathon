@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   Boxes, Layers, Recycle, CheckCircle2, TrendingUp, TrendingDown,
-  LineChart, ShieldCheck, MapPin, Package, Rocket, Loader2, AlertTriangle,
+  LineChart, ShieldCheck, MapPin, Package, Rocket, Loader2, AlertTriangle, Sparkles,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createListing } from '@/lib/actions/seller'
@@ -43,6 +43,31 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
   const [qtyMt, setQtyMt] = useState('')
   const [price, setPrice] = useState('')
   const [error, setError] = useState<string | null>(null)
+
+  // AI pricing copilot
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiTip, setAiTip] = useState<{ reasoning: string; sell_speed: 'fast' | 'moderate' | 'slow' } | null>(null)
+
+  async function suggestPrice() {
+    if (aiLoading) return
+    setAiLoading(true)
+    setAiTip(null)
+    try {
+      const res = await fetch('/api/suggest-price', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, qty_kg: qtyKg }),
+      })
+      if (!res.ok) throw new Error('failed')
+      const data = (await res.json()) as { suggested_price_per_kg: number; sell_speed: 'fast' | 'moderate' | 'slow'; reasoning: string }
+      setPrice(String(data.suggested_price_per_kg))
+      setAiTip({ reasoning: data.reasoning, sell_speed: data.sell_speed })
+    } catch {
+      setError('Could not get an AI price suggestion. Please set a price manually.')
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const qtyKg = useMemo(() => {
     const n = parseFloat(qtyMt)
@@ -248,6 +273,35 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
                     style={{ width: stat.avg > 0 && priceNum > 0 ? `${Math.min(100, (priceNum / (stat.avg * 1.5)) * 100)}%` : '0%' }}
                   />
                 </div>
+              </div>
+
+              {/* AI pricing copilot */}
+              <div>
+                <button
+                  type="button"
+                  onClick={suggestPrice}
+                  disabled={aiLoading}
+                  className="w-full flex items-center justify-center gap-2 border border-secondary/40 text-secondary bg-secondary/[0.04] py-2 rounded-md font-data text-sm font-semibold hover:bg-secondary/[0.08] transition-colors disabled:opacity-50 active:scale-[0.98]"
+                >
+                  {aiLoading
+                    ? <><Loader2 className="h-4 w-4 animate-spin" /> Analysing market…</>
+                    : <><Sparkles className="h-4 w-4" /> Suggest a price with AI</>}
+                </button>
+                {aiTip && (
+                  <div className="mt-2 rounded-md bg-secondary/[0.04] border border-secondary/20 p-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="h-3.5 w-3.5 text-secondary" />
+                      <span className="font-data text-[10px] uppercase tracking-wide text-secondary font-bold">AI suggestion</span>
+                      <span className={cn('ml-auto font-data text-[9px] uppercase px-1.5 py-0.5 rounded-full font-bold',
+                        aiTip.sell_speed === 'fast' ? 'bg-primary text-on-primary' :
+                        aiTip.sell_speed === 'moderate' ? 'bg-secondary text-on-secondary' :
+                        'bg-transition-amber text-white')}>
+                        {aiTip.sell_speed} sell
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-on-surface-variant leading-relaxed">{aiTip.reasoning}</p>
+                  </div>
+                )}
               </div>
 
               {/* Verdict */}
