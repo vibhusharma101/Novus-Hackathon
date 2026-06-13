@@ -1,6 +1,7 @@
 import { streamText } from 'ai'
 import { auth } from '@clerk/nextjs/server'
 import { model } from '@/lib/ai'
+import { checkRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
 const bodySchema = z.object({
@@ -15,6 +16,10 @@ const bodySchema = z.object({
 export async function POST(request: Request) {
   const { userId } = await auth()
   if (!userId) return new Response('Unauthorized', { status: 401 })
+
+  if (!(await checkRateLimit(userId))) {
+    return new Response('Too many requests. Please slow down.', { status: 429 })
+  }
 
   const parsed = bodySchema.safeParse(await request.json())
   if (!parsed.success) return new Response('Bad Request', { status: 400 })

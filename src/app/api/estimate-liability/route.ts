@@ -2,6 +2,7 @@ import { generateObject } from 'ai'
 import { z } from 'zod'
 import { auth } from '@clerk/nextjs/server'
 import { model } from '@/lib/ai'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export const maxDuration = 30
 
@@ -30,6 +31,10 @@ const SYSTEM = [
 export async function POST(request: Request) {
   const { userId } = await auth()
   if (!userId) return new Response('Unauthorized', { status: 401 })
+
+  if (!(await checkRateLimit(userId))) {
+    return new Response('Too many requests. Please slow down.', { status: 429 })
+  }
 
   let parsed: { description: string }
   try {
