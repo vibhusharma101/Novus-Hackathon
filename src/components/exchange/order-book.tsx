@@ -33,6 +33,14 @@ const CAT_LABELS: Record<PlasticCategory, { label: string; cat: string }> = {
 }
 const CAT_ORDER: PlasticCategory[] = ['rigid', 'flexible', 'mlp']
 
+const CAT_COLORS: Record<PlasticCategory, { bg: string; text: string; border: string }> = {
+  rigid:    { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-300' },
+  flexible: { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-300'   },
+  mlp:      { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-300'    },
+}
+
+const fmtMt = (kg: number) => `${(kg / 1000).toFixed(2)} MT`
+
 // ─── Deficit cards ────────────────────────────────────────────────────────────
 
 function DeficitCards({ liabilities }: { liabilities: DeficitRow[] }) {
@@ -108,6 +116,21 @@ function CpcbBadge() {
   )
 }
 
+// ─── Category token badge ─────────────────────────────────────────────────────
+
+function TokenBadge({ category }: { category: PlasticCategory }) {
+  const c = CAT_COLORS[category]
+  const abbr = category === 'rigid' ? 'RIG' : category === 'flexible' ? 'FLX' : 'MLP'
+  return (
+    <div className={cn('relative flex items-center justify-center w-10 h-10 rounded-lg border-2 shrink-0', c.bg, c.border)}>
+      <span className={cn('font-data text-[9px] font-bold tracking-widest', c.text)}>{abbr}</span>
+      <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-px border border-white">
+        <ShieldCheck className={cn('h-3 w-3', c.text)} strokeWidth={2.5} />
+      </div>
+    </div>
+  )
+}
+
 // ─── Main order book ──────────────────────────────────────────────────────────
 
 const PAGE_SIZE = 10
@@ -138,6 +161,15 @@ export function OrderBook({
     async function subscribe() {
       const token = await getToken()
       const sb = getSupabaseBrowserClient(token)
+
+      // Remove any stale channel before creating a new one.
+      // React StrictMode double-invokes effects; .unsubscribe() alone leaves the
+      // channel registered on the singleton client, so a second .on() call after
+      // .subscribe() throws. removeChannel() fully destroys it.
+      if (channelRef.current) {
+        await sb.removeChannel(channelRef.current)
+        channelRef.current = null
+      }
 
       channelRef.current = sb
         .channel('exchange-listings')
@@ -190,7 +222,10 @@ export function OrderBook({
     subscribe()
     return () => {
       mounted = false
-      channelRef.current?.unsubscribe()
+      if (channelRef.current) {
+        getSupabaseBrowserClient(null).removeChannel(channelRef.current)
+        channelRef.current = null
+      }
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -370,10 +405,11 @@ export function OrderBook({
                 <thead className="bg-surface-container-low border-b border-[--color-border-zinc]">
                   <tr>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider w-16">#</th>
+                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider w-16">Token</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Recycler Name</th>
-                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">State</th>
+                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Location</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Type</th>
-                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-right">Qty (kg)</th>
+                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-right">Qty (kg / MT)</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-right">Price / kg</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-center">Action</th>
                   </tr>
@@ -395,6 +431,9 @@ export function OrderBook({
                           #{globalIdx.toString().padStart(4, '0')}
                         </td>
                         <td className="px-4 py-3">
+                          <TokenBadge category={listing.category} />
+                        </td>
+                        <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold text-on-surface">
                               {listing.recycler?.company_name ?? '—'}
@@ -413,8 +452,9 @@ export function OrderBook({
                             {CAT_LABELS[listing.category].label}
                           </span>
                         </td>
-                        <td className="px-4 py-3 font-data text-sm text-right tabular-nums">
-                          {intl.format(Math.round(listing.qty_kg))}
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          <span className="font-data text-sm text-on-surface">{intl.format(Math.round(listing.qty_kg))}</span>
+                          <span className="block font-data text-[10px] text-on-surface-variant">{fmtMt(listing.qty_kg)}</span>
                         </td>
                         <td className="px-4 py-3 font-data text-sm text-right font-bold text-primary tabular-nums">
                           {fmtRs(listing.price_per_kg)}
@@ -491,16 +531,19 @@ export function OrderBook({
                       </div>
                     )}
                     <div className="p-3 border-b border-[--color-border-zinc] flex justify-between items-start">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-['Geist'] text-[18px] font-semibold text-on-surface">
-                            {listing.recycler?.company_name ?? '—'}
-                          </h3>
-                          {listing.recycler?.verified && <CpcbBadge />}
+                      <div className="flex items-start gap-3">
+                        <TokenBadge category={listing.category} />
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="font-['Geist'] text-[18px] font-semibold text-on-surface">
+                              {listing.recycler?.company_name ?? '—'}
+                            </h3>
+                            {listing.recycler?.verified && <CpcbBadge />}
+                          </div>
+                          <p className="font-data text-[11px] text-on-surface-variant">
+                            ID: {listing.recycler?.cpcb_reg_no ?? '—'}
+                          </p>
                         </div>
-                        <p className="font-data text-[11px] text-on-surface-variant">
-                          ID: {listing.recycler?.cpcb_reg_no ?? '—'}
-                        </p>
                       </div>
                       <div className="text-right">
                         <span className="block font-data text-[10px] text-on-surface-variant uppercase">Type</span>
@@ -517,6 +560,7 @@ export function OrderBook({
                         <span className="font-data text-base font-semibold text-on-surface">
                           {intl.format(Math.round(listing.qty_kg))} <span className="text-xs font-normal">kg</span>
                         </span>
+                        <span className="block font-data text-[10px] text-on-surface-variant">{fmtMt(listing.qty_kg)}</span>
                       </div>
                       <div>
                         <span className="block font-data text-[10px] text-on-surface-variant uppercase mb-1">

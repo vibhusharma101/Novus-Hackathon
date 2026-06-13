@@ -94,20 +94,20 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
       return {
         tone: 'best' as const,
         tag: 'CHEAPEST',
-        msg: `At ${fmtRate(priceNum)}/kg you are the lowest active ${category} listing — highest probability of fast fulfilment.`,
+        msg: `Setting your price at ${fmtRate(priceNum)}/kg positions your inventory as the most competitive listing in your state region. Projected time-to-sell: Under 4 hours.`,
       }
     }
     if (priceNum <= stat.avg) {
       return {
         tone: 'good' as const,
         tag: 'COMPETITIVE',
-        msg: `Priced below the ${fmtRate(stat.avg)}/kg market average — strong demand expected.`,
+        msg: `Setting your price at ${fmtRate(priceNum)}/kg positions you competitively below the ${fmtRate(stat.avg)}/kg market average. Projected time-to-sell: Under 12 hours.`,
       }
     }
     return {
       tone: 'high' as const,
       tag: 'ABOVE MARKET',
-      msg: `Above the ${fmtRate(stat.avg)}/kg average — your listing may sell slower than the floor at ${fmtRate(stat.floor)}/kg.`,
+      msg: `Above the ${fmtRate(stat.avg)}/kg average — consider pricing closer to ${fmtRate(stat.floor)}/kg for faster fulfilment.`,
     }
   }, [priceNum, stat, category])
 

@@ -10,6 +10,7 @@ import type { PlasticCategory } from '@/lib/epr/constants'
 
 const intl = new Intl.NumberFormat('en-IN')
 const fmtKg = (n: number) => `${intl.format(Math.round(n))} kg`
+const fmtMt = (n: number) => `${(n / 1000).toFixed(2)} MT`
 
 type LiabilityRow = { category: PlasticCategory; liability_kg: number }
 
@@ -200,24 +201,37 @@ export function ComplianceDashboard({
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-slate-50 border border-[--color-border-zinc] rounded">
               <span className="text-xs text-on-surface-variant uppercase tracking-wide">Total Liability</span>
-              <span className="font-data text-base font-semibold text-on-surface">
-                {totalLiabilityKg > 0 ? fmtKg(totalLiabilityKg) : '— kg'}
-              </span>
+              <div className="text-right">
+                <span className="block font-data text-base font-semibold text-on-surface">
+                  {totalLiabilityKg > 0 ? fmtKg(totalLiabilityKg) : '— kg'}
+                </span>
+                {totalLiabilityKg > 0 && (
+                  <span className="block font-data text-[10px] text-on-surface-variant">[{fmtMt(totalLiabilityKg)}]</span>
+                )}
+              </div>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-50 border border-[--color-border-zinc] rounded">
               <span className="text-xs text-on-surface-variant uppercase tracking-wide">Credits Secured</span>
-              <span className="font-data text-base font-semibold text-primary">
-                {fmtKg(creditsSecured)}
-              </span>
+              <div className="text-right">
+                <span className="block font-data text-base font-semibold text-primary">
+                  {fmtKg(creditsSecured)}
+                </span>
+                <span className="block font-data text-[10px] text-on-surface-variant">[{fmtMt(creditsSecured)}]</span>
+              </div>
             </div>
             <div className="flex justify-between items-center p-3 bg-error-container/30 border border-[--color-risk-red]/10 rounded">
               <span className="text-xs text-[--color-risk-red] uppercase tracking-wide font-bold flex items-center gap-1.5">
                 <TrendingDown className="h-3.5 w-3.5" />
                 Current Deficit
               </span>
-              <span className="font-data text-base font-semibold text-[--color-risk-red]">
-                {deficitKg > 0 ? fmtKg(deficitKg) : '— kg'}
-              </span>
+              <div className="text-right">
+                <span className="block font-data text-base font-semibold text-[--color-risk-red]">
+                  {deficitKg > 0 ? fmtKg(deficitKg) : '— kg'}
+                </span>
+                {deficitKg > 0 && (
+                  <span className="block font-data text-[10px] text-[--color-risk-red]/70">[{fmtMt(deficitKg)}]</span>
+                )}
+              </div>
             </div>
             <div className="pt-4 border-t border-[--color-border-zinc]">
               <div className="flex justify-between items-center mb-2">
