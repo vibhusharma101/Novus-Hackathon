@@ -1,10 +1,42 @@
-export default function DashboardPage() {
+import type { Metadata } from 'next'
+import { auth } from '@clerk/nextjs/server'
+import { redirect } from 'next/navigation'
+import { createUserClient } from '@/lib/supabase'
+import { ComplianceDashboard } from '@/components/dashboard/compliance-overview'
+import type { PlasticCategory } from '@/lib/epr/constants'
+
+export const metadata: Metadata = {
+  title: 'Compliance Dashboard | EPRx Exchange',
+  description: 'Monitor your EPR compliance status and credit deficit.',
+}
+
+export default async function DashboardPage() {
+  const { userId } = await auth()
+  if (!userId) redirect('/sign-in')
+
+  const supabase = await createUserClient()
+
+  const [{ data: brand }, { data: liabilities }] = await Promise.all([
+    supabase.from('brands').select('company_name').maybeSingle(),
+    supabase.from('liabilities').select('category, liability_kg'),
+  ])
+
+  const rows = (liabilities ?? []) as { category: PlasticCategory; liability_kg: number }[]
+
+  // Days remaining until June 30 (EPR annual return deadline)
+  const now = new Date()
+  const deadline = new Date(now.getFullYear(), 5, 30) // June = month index 5
+  if (deadline < now) deadline.setFullYear(deadline.getFullYear() + 1)
+  const daysRemaining = Math.ceil(
+    (deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+  )
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Welcome back.</p>
-      </div>
-    </div>
+    <ComplianceDashboard
+      companyName={brand?.company_name ?? 'Buyer'}
+      liabilities={rows}
+      creditsSecured={0}
+      daysRemaining={daysRemaining}
+    />
   )
 }
