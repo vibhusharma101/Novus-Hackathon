@@ -7,13 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Sparkles, X, ArrowUp, ShoppingCart, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-declare global {
-  interface Window {
-    pendo?: { trackAgent: (eventType: string, metadata: object) => void }
-  }
-}
-
-const AGENT_ID = 'jKjnVoRTM8wkeii0t_jXcsoHgAk'
+const AGENT_ID = 'HJBcjrkMod2_D5jL1_7hVjzPgiE'
 
 const BUY_RE = /\[\[buy:([a-zA-Z0-9-]+)\]\]/g
 
@@ -95,15 +89,15 @@ export function CopilotPanel() {
   function submit(text: string, suggestedPrompt = false) {
     const t = text.trim()
     if (!t || busy) return
-    sendMessage({ text: t })
-    setInput('')
     window.pendo?.trackAgent('prompt', {
       agentId: AGENT_ID,
       conversationId,
-      messageId: `prompt_${Date.now()}`,
+      messageId: crypto.randomUUID(),
       content: t,
       suggestedPrompt,
     })
+    sendMessage({ text: t })
+    setInput('')
   }
 
   function goBuy(id: string) {
