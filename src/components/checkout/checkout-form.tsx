@@ -91,11 +91,6 @@ export function CheckoutForm({ listing, recycler, brand, defaultQtyKg }: Checkou
             listing_id: listing.id,
             category: listing.category,
             qty_kg: qty,
-            price_per_kg: listing.price_per_kg,
-            credits_cost: creditsCost,
-            platform_fee: platformFee,
-            total: total,
-            recycler_name: recyclerName,
           })
         }
         router.push(`/dashboard/orders/${result.orderId}/certificate`)

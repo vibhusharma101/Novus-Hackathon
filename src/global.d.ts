@@ -1,1 +1,1 @@
-declare var pendo: any;
+// Pendo global type — see src/types/pendo.d.ts
