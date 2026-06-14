@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Sparkles, X, ArrowUp, ShoppingCart, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const AGENT_ID = 'HJBcjrkMod2_D5jL1_7hVjzPgiE'
+const AGENT_ID = process.env.NEXT_PUBLIC_PENDO_AGENT_ID ?? ''
 
 const BUY_RE = /\[\[buy:([a-zA-Z0-9-]+)\]\]/g
 
@@ -92,7 +92,7 @@ export function CopilotPanel() {
     if (typeof pendo !== 'undefined') {
       pendo.track('copilot_message_sent', {
         query_length: t.length,
-        is_suggestion_click: SUGGESTIONS.includes(text),
+        is_suggestion_click: SUGGESTIONS.includes(t),
         message_count_in_session: messages.length + 1,
       })
     }
