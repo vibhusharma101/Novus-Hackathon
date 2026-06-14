@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { auth } from '@clerk/nextjs/server'
 
-const supabaseUrl = process.env.SUPABASE_URL!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 
 // Admin client — bypasses RLS. Use ONLY for background jobs or admin operations.
 // Never use this for user-scoped data queries.
@@ -11,11 +11,11 @@ export const supabaseAdmin = createClient(
   { auth: { persistSession: false } }
 )
 
-// User-scoped client — respects RLS. Use this for all user data queries.
-// Call once per request; do not cache across requests.
+// User-scoped server client — respects RLS. Use in server actions + route handlers.
+// Uses native Clerk→Supabase auth (no JWT template needed).
 export async function createUserClient() {
   const { getToken } = await auth()
-  const token = await getToken({ template: 'supabase' })
+  const token = await getToken()
 
   return createClient(
     supabaseUrl,
