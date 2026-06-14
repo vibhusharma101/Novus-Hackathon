@@ -89,6 +89,13 @@ export function CopilotPanel() {
   function submit(text: string, suggestedPrompt = false) {
     const t = text.trim()
     if (!t || busy) return
+    if (typeof pendo !== 'undefined') {
+      pendo.track('copilot_message_sent', {
+        query_length: t.length,
+        is_suggestion_click: SUGGESTIONS.includes(text),
+        message_count_in_session: messages.length + 1,
+      })
+    }
     window.pendo?.trackAgent('prompt', {
       agentId: AGENT_ID,
       conversationId,
@@ -101,6 +108,12 @@ export function CopilotPanel() {
   }
 
   function goBuy(id: string) {
+    if (typeof pendo !== 'undefined') {
+      pendo.track('copilot_buy_initiated', {
+        listing_id: id,
+        message_count_before_buy: messages.length,
+      })
+    }
     setOpen(false)
     router.push(`/dashboard/checkout/${id}`)
   }
