@@ -36,7 +36,7 @@ export function PendoInitializer() {
         // Only send pseudonymous business identifiers — no personal contact data.
         const visitor: Record<string, unknown> = { id: metadata.visitorId }
 
-        const payload: Record<string, unknown> = { visitor }
+        const payload: { visitor: Record<string, unknown>; account?: Record<string, unknown> } = { visitor }
 
         if ('accountId' in metadata && metadata.accountId) {
           const account: Record<string, unknown> = { id: metadata.accountId }
