@@ -355,6 +355,16 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
         toast.error(result.error)
         return
       }
+      if (typeof pendo !== 'undefined') {
+        pendo.track('liability_calculated', {
+          categories_count: selectedCats.length,
+          categories: selectedCats.map(c => c.id).join(','),
+          total_market_kg: totalMarketKg,
+          total_liability_kg: totalLiabilityKg,
+          estimated_cost_min: totalMinCost,
+          estimated_cost_max: totalMaxCost,
+        })
+      }
       onNext()
     })
   }
@@ -974,7 +984,19 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={() => {
+              if (typeof pendo !== 'undefined') {
+                pendo.track('compliance_ledger_downloaded', {
+                  categories_count: selectedCats.length,
+                  categories: selectedCats.map(c => c.id).join(','),
+                  total_market_kg: totalMarketKg,
+                  total_liability_kg: totalLiabilityKg,
+                  estimated_cost_min: totalMinCost,
+                  estimated_cost_max: totalMaxCost,
+                })
+              }
+              window.print()
+            }}
             className="px-5 py-2.5 border border-[--color-border-zinc] text-on-surface text-sm font-semibold rounded hover:bg-slate-50 transition-all active:scale-[0.98]"
           >
             Download Ledger

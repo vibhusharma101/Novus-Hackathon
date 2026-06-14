@@ -62,11 +62,24 @@ export function CopilotPanel() {
   function submit(text: string) {
     const t = text.trim()
     if (!t || busy) return
+    if (typeof pendo !== 'undefined') {
+      pendo.track('copilot_query_submitted', {
+        query_length: t.length,
+        message_count: messages.length,
+        is_suggestion: SUGGESTIONS.includes(t),
+      })
+    }
     sendMessage({ text: t })
     setInput('')
   }
 
   function goBuy(id: string) {
+    if (typeof pendo !== 'undefined') {
+      pendo.track('copilot_buy_recommendation_followed', {
+        listing_id: id,
+        message_count: messages.length,
+      })
+    }
     setOpen(false)
     router.push(`/dashboard/checkout/${id}`)
   }

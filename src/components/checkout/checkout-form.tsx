@@ -85,6 +85,20 @@ export function CheckoutForm({ listing, recycler, brand, defaultQtyKg }: Checkou
     startTransition(async () => {
       const result = await placeOrder({ listingId: listing.id, qty_kg: qty })
       if (result.ok) {
+        if (typeof pendo !== 'undefined') {
+          pendo.track('order_placed', {
+            order_id: result.orderId,
+            listing_id: listing.id,
+            category: listing.category,
+            qty_kg: qty,
+            price_per_kg: listing.price_per_kg,
+            credits_cost: creditsCost,
+            platform_fee: platformFee,
+            total: total,
+            recycler_name: recyclerName,
+            recycler_state: recyclerState,
+          })
+        }
         router.push(`/dashboard/orders/${result.orderId}/certificate`)
       } else {
         setError(result.error)

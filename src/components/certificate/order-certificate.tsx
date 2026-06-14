@@ -180,7 +180,18 @@ export function OrderCertificate({
             <div className="flex flex-col gap-3">
               <button
                 type="button"
-                onClick={() => window.print()}
+                onClick={() => {
+                  if (typeof pendo !== 'undefined') {
+                    pendo.track('certificate_downloaded', {
+                      order_id: order.id,
+                      reference_id: referenceId,
+                      category: order.category,
+                      qty_kg: order.qty_kg,
+                      order_status: order.status,
+                    })
+                  }
+                  window.print()
+                }}
                 className="w-full bg-primary py-4 rounded-xl text-on-primary font-['Geist'] font-semibold flex items-center justify-center gap-3 hover:bg-primary-container transition-all active:scale-[0.98]"
               >
                 <Download className="h-5 w-5" />

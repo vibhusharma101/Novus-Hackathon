@@ -53,6 +53,14 @@ export function SellerOnboardingForm() {
       toast.error(result.error)
       return
     }
+    if (typeof pendo !== 'undefined') {
+      pendo.track('seller_onboarding_completed', {
+        company_name: values.company_name,
+        state: values.state,
+        capacity_mt: values.capacity_mt,
+        cpcb_reg_no: values.cpcb_reg_no,
+      })
+    }
     runVerification()
   }
 
