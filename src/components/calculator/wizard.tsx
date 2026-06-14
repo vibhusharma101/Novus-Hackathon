@@ -873,7 +873,20 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
           </div>
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={() => {
+              if (typeof pendo !== 'undefined') {
+                pendo.track('ledger_downloaded', {
+                  categories_selected: selectedCats.map(c => c.id).join(','),
+                  category_count: selectedCats.length,
+                  total_liability_kg: totalLiabilityKg,
+                  total_market_kg: totalMarketKg,
+                  estimated_cost_min: totalMinCost,
+                  estimated_cost_max: totalMaxCost,
+                  compliance_id: calcId,
+                })
+              }
+              window.print()
+            }}
             className="hidden md:block px-2 py-0.5 bg-zinc-200 rounded font-data text-[10px] text-on-surface-variant hover:bg-zinc-300 transition-colors"
           >
             PDF_REPORT
@@ -984,7 +997,20 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
         <div className="flex gap-3">
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={() => {
+              if (typeof pendo !== 'undefined') {
+                pendo.track('ledger_downloaded', {
+                  categories_selected: selectedCats.map(c => c.id).join(','),
+                  category_count: selectedCats.length,
+                  total_liability_kg: totalLiabilityKg,
+                  total_market_kg: totalMarketKg,
+                  estimated_cost_min: totalMinCost,
+                  estimated_cost_max: totalMaxCost,
+                  compliance_id: calcId,
+                })
+              }
+              window.print()
+            }}
             className="px-5 py-2.5 border border-[--color-border-zinc] text-on-surface text-sm font-semibold rounded hover:bg-slate-50 transition-all active:scale-[0.98]"
           >
             Download Ledger

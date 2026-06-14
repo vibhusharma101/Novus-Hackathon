@@ -93,12 +93,20 @@ export function OrderHandshake({ order }: OrderHandshakeProps) {
               order_id: order.id,
               category: order.category,
               qty_kg: order.qtyKg,
+              price_per_kg: order.pricePerKg,
+              credits_cost: order.creditsCost,
+              platform_fee: order.platformFee,
+              total: order.total,
+              net_payout: netPayout,
+              buyer_company_name: order.buyerCompanyName ?? 'Unknown',
             })
           } else {
             pendo.track('order_declined', {
               order_id: order.id,
               category: order.category,
               qty_kg: order.qtyKg,
+              total: order.total,
+              buyer_company_name: order.buyerCompanyName ?? 'Unknown',
             })
           }
         }
