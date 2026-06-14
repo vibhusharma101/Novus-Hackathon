@@ -63,18 +63,21 @@
   --color-bg-slate-soft:          #f8fafc;
 
   /* shadcn compat */
-  --color-card:               var(--surface-container-lowest);
-  --color-card-foreground:    var(--on-surface);
-  --color-popover:            var(--surface-container-lowest);
-  --color-popover-foreground: var(--on-surface);
-  --color-muted:              var(--surface-container-low);
-  --color-muted-foreground:   var(--on-surface-variant);
-  --color-accent:             var(--surface-container);
-  --color-accent-foreground:  var(--on-surface);
-  --color-destructive:        var(--error);
-  --color-border:             var(--outline-variant);
-  --color-input:              var(--outline-variant);
-  --color-ring:               var(--primary);
+  --color-card:                    var(--surface-container-lowest);
+  --color-card-foreground:         var(--on-surface);
+  --color-popover:                 var(--surface-container-lowest);
+  --color-popover-foreground:      var(--on-surface);
+  --color-muted:                   var(--surface-container-low);
+  --color-muted-foreground:        var(--on-surface-variant);
+  --color-accent:                  var(--surface-container);
+  --color-accent-foreground:       var(--on-surface);
+  --color-destructive:             var(--error);
+  --color-border:                  var(--outline-variant);
+  --color-input:                   var(--outline-variant);
+  --color-ring:                    var(--primary);
+  /* foreground tokens — fixes text-primary-foreground rendering black */
+  --color-primary-foreground:      var(--on-primary);
+  --color-secondary-foreground:    var(--on-secondary);
 
   /* Radius */
   --radius-sm:  0.125rem;
