@@ -3,8 +3,9 @@
 -- Paste this entire file into: Supabase Dashboard → SQL Editor → Run
 -- ============================================================
 
--- Helper: extract Clerk userId from the JWT sub claim
-create or replace function auth.clerk_user_id() returns text
+-- Helper: extract Clerk userId from the JWT sub claim.
+-- Defined in public schema — the SQL Editor cannot create functions in auth schema.
+create or replace function public.clerk_user_id() returns text
   language sql stable
   as $$
     select nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')
@@ -109,52 +110,56 @@ alter table certificates enable row level security;
 
 -- brands: own row only
 create policy "brands: own row" on brands
-  for all using (clerk_user_id = auth.clerk_user_id());
+  for all using (clerk_user_id = public.clerk_user_id());
 
 -- recyclers: own row only
 create policy "recyclers: own row" on recyclers
-  for all using (clerk_user_id = auth.clerk_user_id());
+  for all using (clerk_user_id = public.clerk_user_id());
+
+-- recyclers: any authenticated user can read public fields (needed for order book join)
+create policy "recyclers: public read" on recyclers
+  for select using (public.clerk_user_id() is not null);
 
 -- liabilities: brand owner only
 create policy "liabilities: brand owner" on liabilities
   for all using (
-    brand_id in (select id from brands where clerk_user_id = auth.clerk_user_id())
+    brand_id in (select id from brands where clerk_user_id = public.clerk_user_id())
   );
 
 -- listings: any authed user reads active listings; only owning recycler writes
 create policy "listings: read active" on listings
   for select using (
-    auth.clerk_user_id() is not null
+    public.clerk_user_id() is not null
     and status = 'active'
   );
 
 create policy "listings: recycler writes" on listings
   for insert with check (
-    recycler_id in (select id from recyclers where clerk_user_id = auth.clerk_user_id())
+    recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
 create policy "listings: recycler updates own" on listings
   for update using (
-    recycler_id in (select id from recyclers where clerk_user_id = auth.clerk_user_id())
+    recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
 -- orders: visible only to the buyer or the recycler involved
 create policy "orders: buyer or recycler" on orders
   for select using (
-    buyer_id   in (select id from brands    where clerk_user_id = auth.clerk_user_id())
+    buyer_id   in (select id from brands    where clerk_user_id = public.clerk_user_id())
     or
-    recycler_id in (select id from recyclers where clerk_user_id = auth.clerk_user_id())
+    recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
 create policy "orders: buyer inserts" on orders
   for insert with check (
-    buyer_id in (select id from brands where clerk_user_id = auth.clerk_user_id())
+    buyer_id in (select id from brands where clerk_user_id = public.clerk_user_id())
   );
 
 -- only recycler can update status (accept/decline); system handles expired via cron
 create policy "orders: recycler updates" on orders
   for update using (
-    recycler_id in (select id from recyclers where clerk_user_id = auth.clerk_user_id())
+    recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
 -- certificates: visible to buyer or recycler of the associated order
@@ -162,14 +167,41 @@ create policy "certificates: buyer or recycler" on certificates
   for select using (
     order_id in (
       select id from orders where
-        buyer_id    in (select id from brands    where clerk_user_id = auth.clerk_user_id())
+        buyer_id    in (select id from brands    where clerk_user_id = public.clerk_user_id())
         or
-        recycler_id in (select id from recyclers where clerk_user_id = auth.clerk_user_id())
+        recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
     )
   );
 
 create policy "certificates: system inserts" on certificates
   for insert with check (true);
+
+-- ============================================================
+-- ROLE GRANTS
+-- Supabase API roles need table-level privileges; RLS (above) then filters
+-- rows. Without these grants every authed request fails with
+-- "permission denied for table ..." BEFORE policies are evaluated.
+-- (Tables created via a direct Postgres connection do not get the
+-- default Supabase grants, so we set them explicitly + for future tables.)
+-- ============================================================
+
+grant usage on schema public to anon, authenticated, service_role;
+
+grant select, insert, update, delete
+  on all tables in schema public
+  to anon, authenticated, service_role;
+
+grant usage, select
+  on all sequences in schema public
+  to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant select, insert, update, delete on tables
+  to anon, authenticated, service_role;
+
+alter default privileges in schema public
+  grant usage, select on sequences
+  to anon, authenticated, service_role;
 
 -- ============================================================
 -- REALTIME

@@ -16,6 +16,7 @@ export const supabaseAdmin = createClient(
 export async function createUserClient() {
   const { getToken } = await auth()
   const token = await getToken()
+  if (!token) throw new Error('No auth token — Clerk session may have expired')
 
   return createClient(
     supabaseUrl,
