@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { Sparkles, X, ArrowUp, ShoppingCart, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-const AGENT_ID = 'HJBcjrkMod2_D5jL1_7hVjzPgiE'
+const AGENT_ID = 'DS8zF6K959Cj0SKjsMFLPFsgi5A'
 
 const BUY_RE = /\[\[buy:([a-zA-Z0-9-]+)\]\]/g
 
