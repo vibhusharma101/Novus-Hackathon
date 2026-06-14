@@ -87,6 +87,21 @@ export function OrderHandshake({ order }: OrderHandshakeProps) {
       const result = await respondToOrder({ orderId: order.id, action })
       if (result.ok) {
         setStatus(result.status)
+        if (typeof pendo !== 'undefined') {
+          if (action === 'accept') {
+            pendo.track('order_accepted', {
+              order_id: order.id,
+              category: order.category,
+              qty_kg: order.qtyKg,
+            })
+          } else {
+            pendo.track('order_declined', {
+              order_id: order.id,
+              category: order.category,
+              qty_kg: order.qtyKg,
+            })
+          }
+        }
         toast.success(action === 'accept' ? 'Order accepted — escrow released.' : 'Order declined.')
         setTimeout(() => router.push('/seller/vault'), 1400)
       } else {
