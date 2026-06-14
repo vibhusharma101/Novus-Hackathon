@@ -39,6 +39,13 @@ export function BuyerOnboardingForm() {
       toast.error(result.error)
       return
     }
+    if (typeof pendo !== 'undefined') {
+      pendo.track('buyer_onboarding_completed', {
+        company_name: values.company_name,
+        state: values.state,
+        has_gstin: Boolean(values.gstin),
+      })
+    }
     // Success — show confirmed state briefly, then advance to the calculator (B3).
     setDone(true)
     router.push('/dashboard/calculator')
