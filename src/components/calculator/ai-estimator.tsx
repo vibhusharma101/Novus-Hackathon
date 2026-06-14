@@ -43,6 +43,19 @@ export function AiEstimator({
       const data = (await res.json()) as EstimateResponse
       onEstimate({ rigid: data.rigid_kg, flexible: data.flexible_kg, mlp: data.mlp_kg })
       setApplied(data.rationale)
+      if (typeof pendo !== 'undefined') {
+        pendo.track('ai_liability_estimated', {
+          description_length: text.length,
+          rigid_kg: data.rigid_kg,
+          flexible_kg: data.flexible_kg,
+          mlp_kg: data.mlp_kg,
+          categories_with_values: [
+            data.rigid_kg > 0 ? 'rigid' : null,
+            data.flexible_kg > 0 ? 'flexible' : null,
+            data.mlp_kg > 0 ? 'mlp' : null,
+          ].filter(Boolean).join(','),
+        })
+      }
     } catch {
       setError('Could not estimate from that description. Try adding product types and volumes.')
     } finally {

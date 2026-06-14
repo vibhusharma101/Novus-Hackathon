@@ -62,6 +62,16 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
       const data = (await res.json()) as { suggested_price_per_kg: number; sell_speed: 'fast' | 'moderate' | 'slow'; reasoning: string }
       setPrice(String(data.suggested_price_per_kg))
       setAiTip({ reasoning: data.reasoning, sell_speed: data.sell_speed })
+      if (typeof pendo !== 'undefined') {
+        pendo.track('ai_price_suggested', {
+          category: category,
+          qty_kg: qtyKg,
+          suggested_price_per_kg: data.suggested_price_per_kg,
+          sell_speed: data.sell_speed,
+          market_floor: stat.floor,
+          market_avg: stat.avg,
+        })
+      }
     } catch {
       setError('Could not get an AI price suggestion. Please set a price manually.')
     } finally {
@@ -126,6 +136,17 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
     startTransition(async () => {
       const result = await createListing({ category, qty_kg: qtyKg, price_per_kg: priceNum })
       if (result.ok) {
+        if (typeof pendo !== 'undefined') {
+          pendo.track('listing_published', {
+            category: category,
+            qty_kg: qtyKg,
+            qty_mt: parseFloat(qtyMt),
+            price_per_kg: priceNum,
+            gross_value: gross,
+            used_ai_price_suggestion: Boolean(aiTip),
+            market_verdict: verdict.tag,
+          })
+        }
         toast.success('Listing published to the live market.')
         router.push('/seller/vault')
       } else {

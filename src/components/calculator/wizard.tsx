@@ -355,6 +355,16 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
         toast.error(result.error)
         return
       }
+      if (typeof pendo !== 'undefined') {
+        pendo.track('liability_calculated', {
+          categories_selected: selectedCats.map(c => c.id).join(','),
+          category_count: selectedCats.length,
+          total_market_kg: totalMarketKg,
+          total_liability_kg: totalLiabilityKg,
+          estimated_cost_min: totalMinCost,
+          estimated_cost_max: totalMaxCost,
+        })
+      }
       onNext()
     })
   }
