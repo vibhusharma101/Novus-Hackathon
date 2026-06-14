@@ -42,8 +42,17 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="px-4 py-4 border-t">
-        <UserButton />
+      <div className="px-4 py-4 border-t flex items-center gap-3">
+        <UserButton
+          appearance={{
+            elements: {
+              avatarBox: 'h-8 w-8 ring-2 ring-primary/20',
+              userButtonPopoverCard: 'shadow-xl border border-[--color-border-zinc] rounded-xl',
+              userButtonPopoverActionButton: 'hover:bg-surface-container rounded-lg',
+            },
+          }}
+        />
+        <span className="font-data text-[11px] text-on-surface-variant uppercase tracking-wide">Account</span>
       </div>
     </aside>
   )
