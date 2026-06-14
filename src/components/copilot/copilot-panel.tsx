@@ -7,6 +7,8 @@ import { useRouter } from 'next/navigation'
 import { Sparkles, X, ArrowUp, ShoppingCart, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+const AGENT_ID = 'HJBcjrkMod2_D5jL1_7hVjzPgiE'
+
 const BUY_RE = /\[\[buy:([a-zA-Z0-9-]+)\]\]/g
 
 const SUGGESTIONS = [
@@ -49,6 +51,9 @@ export function CopilotPanel() {
   const [input, setInput] = useState('')
   const scrollRef = useRef<HTMLDivElement>(null)
 
+  const conversationId = useRef(crypto.randomUUID()).current
+  const prevStatusRef = useRef<string>('ready')
+
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: '/api/copilot' }),
   })
@@ -59,9 +64,38 @@ export function CopilotPanel() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
   }, [messages, open])
 
-  function submit(text: string) {
+  // Track agent_response when streaming finishes
+  useEffect(() => {
+    const wasBusy = prevStatusRef.current === 'submitted' || prevStatusRef.current === 'streaming'
+    if (wasBusy && status === 'ready' && messages.length > 0) {
+      const lastMsg = messages[messages.length - 1]
+      if (lastMsg.role === 'assistant') {
+        let content = ''
+        for (const part of lastMsg.parts) {
+          if (part.type === 'text') content += part.text
+        }
+        window.pendo?.trackAgent('agent_response', {
+          agentId: AGENT_ID,
+          conversationId,
+          messageId: lastMsg.id,
+          content,
+          modelUsed: 'claude-sonnet-4-6',
+        })
+      }
+    }
+    prevStatusRef.current = status
+  }, [status, messages, conversationId])
+
+  function submit(text: string, suggestedPrompt = false) {
     const t = text.trim()
     if (!t || busy) return
+    window.pendo?.trackAgent('prompt', {
+      agentId: AGENT_ID,
+      conversationId,
+      messageId: crypto.randomUUID(),
+      content: t,
+      suggestedPrompt,
+    })
     sendMessage({ text: t })
     setInput('')
   }
@@ -112,7 +146,7 @@ export function CopilotPanel() {
                     <button
                       key={s}
                       type="button"
-                      onClick={() => submit(s)}
+                      onClick={() => submit(s, true)}
                       className="block w-full text-left text-[13px] px-3 py-2 rounded-lg border border-[--color-border-zinc] hover:border-primary hover:bg-surface-container-low transition-colors"
                     >
                       {s}
