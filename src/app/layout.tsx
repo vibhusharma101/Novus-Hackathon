@@ -42,7 +42,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <ClerkProvider appearance={{ theme: shadcn }}>
+        <ClerkProvider appearance={{
+          theme: shadcn,
+          variables: {
+            colorPrimary: '#006948',
+            colorBackground: '#ffffff',
+            borderRadius: '0.5rem',
+          },
+        }}>
           {children}
           <Toaster richColors />
         </ClerkProvider>

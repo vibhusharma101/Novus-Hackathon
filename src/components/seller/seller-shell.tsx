@@ -56,7 +56,15 @@ export function SellerSidebar() {
           Create Listing
         </Link>
         <div className="flex items-center gap-3 px-2">
-          <UserButton />
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: 'h-8 w-8 ring-2 ring-primary/20',
+                userButtonPopoverCard: 'shadow-xl border border-[--color-border-zinc] rounded-xl',
+                userButtonPopoverActionButton: 'hover:bg-surface-container rounded-lg',
+              },
+            }}
+          />
           <span className="font-data text-[11px] text-on-surface-variant">Account</span>
         </div>
       </div>
@@ -77,7 +85,14 @@ export function SellerTopbar() {
           Create Listing
         </Link>
         <div className="lg:hidden">
-          <UserButton />
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: 'h-8 w-8 ring-2 ring-primary/20',
+                userButtonPopoverCard: 'shadow-xl border border-[--color-border-zinc] rounded-xl',
+              },
+            }}
+          />
         </div>
       </div>
     </header>
@@ -110,7 +125,14 @@ export function SellerMobileNav() {
         </span>
       </Link>
       <div className="flex flex-col items-center justify-center gap-0.5 text-on-surface-variant">
-        <UserButton />
+        <UserButton
+          appearance={{
+            elements: {
+              avatarBox: 'h-7 w-7 ring-2 ring-primary/20',
+              userButtonPopoverCard: 'shadow-xl border border-[--color-border-zinc] rounded-xl',
+            },
+          }}
+        />
         <span className="font-data text-[11px]">Account</span>
       </div>
     </nav>
