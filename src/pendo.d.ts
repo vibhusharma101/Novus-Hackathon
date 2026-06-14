@@ -1,5 +1,1 @@
-interface Window {
-  pendo?: {
-    trackAgent: (eventType: string, metadata: object) => void;
-  };
-}
+// Pendo global type — see src/types/pendo.d.ts
