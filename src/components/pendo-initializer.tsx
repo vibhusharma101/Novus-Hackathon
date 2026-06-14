@@ -10,7 +10,9 @@ export function PendoInitializer() {
 
   // Boot the SDK exactly once with an anonymous visitor.
   useEffect(() => {
-    pendo.initialize({ visitor: { id: '' } })
+    if (typeof pendo !== 'undefined') {
+      pendo.initialize({ visitor: { id: '' } })
+    }
   }, [])
 
   useEffect(() => {
@@ -31,11 +33,8 @@ export function PendoInitializer() {
       getPendoMetadata().then((metadata) => {
         if (!metadata) return
 
+        // Only send pseudonymous business identifiers — no personal contact data.
         const visitor: Record<string, unknown> = { id: metadata.visitorId }
-        if ('contactName' in metadata && metadata.contactName) visitor.full_name = metadata.contactName
-        if ('email' in metadata && metadata.email) visitor.email = metadata.email
-        if ('phone' in metadata && metadata.phone) visitor.phone = metadata.phone
-        if ('whatsapp' in metadata && metadata.whatsapp) visitor.whatsapp = metadata.whatsapp
 
         const payload: Record<string, unknown> = { visitor }
 
