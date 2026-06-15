@@ -42,7 +42,7 @@ function ComplianceDonut({ pct }: { pct: number }) {
     'text-[--color-risk-red]'
 
   return (
-    <div className="relative w-56 h-56 mx-auto shrink-0">
+    <div className="relative w-36 h-36 md:w-56 md:h-56 mx-auto shrink-0">
       <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
         {/* Track */}
         <path
@@ -64,7 +64,7 @@ function ComplianceDonut({ pct }: { pct: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
         <span
-          className="text-[42px] font-['Geist'] font-bold leading-none"
+          className="text-[28px] md:text-[42px] font-['Geist'] font-bold leading-none"
           style={{ color }}
         >
           {pct}%
@@ -107,7 +107,7 @@ export function ComplianceDashboard({
   const urgent = daysRemaining <= 30
 
   return (
-    <div className="-m-6 p-6 min-h-full micro-grid">
+    <div className="-m-4 p-4 lg:-m-6 lg:p-6 min-h-full micro-grid">
 
       {/* ── Welcome banner ── */}
       <div className="mb-6 bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 relative overflow-hidden">
@@ -143,7 +143,7 @@ export function ComplianceDashboard({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
 
         {/* Donut + category bars */}
-        <div className="lg:col-span-2 bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg p-8 flex flex-col md:flex-row items-center justify-around gap-8">
+        <div className="lg:col-span-2 bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg p-4 md:p-8 flex flex-col md:flex-row items-center justify-around gap-6 md:gap-8">
           <ComplianceDonut pct={compliancePct} />
 
           <div className="w-full max-w-sm space-y-6">
@@ -262,7 +262,7 @@ export function ComplianceDashboard({
           <h3 className="font-['Geist'] text-[18px] font-semibold text-on-surface">Recent Transactions</h3>
           <span className="font-data text-[11px] text-outline uppercase tracking-wide">Fiscal Year 2024–25</span>
         </div>
-        <div className="min-h-72 flex flex-col items-center justify-center p-12 text-center">
+        <div className="min-h-72 flex flex-col items-center justify-center p-6 md:p-12 text-center">
           <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 border border-[--color-border-zinc]">
             <ClipboardList className="h-7 w-7 text-outline" />
           </div>

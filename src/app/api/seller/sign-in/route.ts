@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 })
   }
 
-  const companyName = (cred.recyclers as { company_name: string } | null)?.company_name ?? 'Seller'
+  const companyName = (cred.recyclers as unknown as { company_name: string } | null)?.company_name ?? 'Seller'
 
   await createSellerSession({ recyclerId: cred.recycler_id, companyName })
 

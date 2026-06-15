@@ -12,7 +12,7 @@ import { createListing } from '@/lib/actions/seller'
 import { PLATFORM_FEE_PCT } from '@/lib/epr/constants'
 import { LISTING_MIN_KG, LISTING_MAX_KG } from '@/lib/validators/listing'
 import type { PlasticCategory } from '@/lib/epr/constants'
-import type { MarketStat } from '@/app/seller/listings/new/page'
+import type { MarketStat } from '@/app/seller/(portal)/listings/new/page'
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
 
