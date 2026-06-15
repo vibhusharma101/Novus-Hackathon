@@ -1,16 +1,21 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { SignUp } from '@clerk/nextjs'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { ShieldCheck, Zap, Lock } from 'lucide-react'
 
 function SignUpInner() {
   const role = useSearchParams().get('role')
-  const redirectUrl =
-    role === 'seller' ? '/onboarding/seller' :
-    role === 'buyer'  ? '/onboarding/buyer'  :
-    '/dashboard'
+  const router = useRouter()
+
+  useEffect(() => {
+    if (role === 'seller') router.replace('/seller/sign-in')
+  }, [role, router])
+
+  const redirectUrl = role === 'buyer' ? '/onboarding/buyer' : '/dashboard'
+
+  if (role === 'seller') return null
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2 bg-background">

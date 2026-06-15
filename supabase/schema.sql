@@ -97,6 +97,15 @@ create table if not exists orders (
 alter table orders add column if not exists buyer_gstin        text;
 alter table orders add column if not exists buyer_company_name text;
 
+-- Seller credentials (email + bcrypt hash) — Clerk-free auth for recyclers
+create table if not exists seller_credentials (
+  id              uuid primary key default gen_random_uuid(),
+  recycler_id     uuid not null unique references recyclers(id) on delete cascade,
+  email           text not null unique,
+  password_hash   text not null,
+  created_at      timestamptz not null default now()
+);
+
 -- Certificates (one per completed order)
 create table if not exists certificates (
   id              uuid primary key default gen_random_uuid(),

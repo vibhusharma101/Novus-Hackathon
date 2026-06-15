@@ -11,23 +11,24 @@ export async function getPendoMetadata() {
   try {
     supabase = await createUserClient()
   } catch {
-    // No valid auth token — return minimal metadata
     return { visitorId: userId }
   }
 
-  // Try brand (buyer) profile first
-  const { data: brand } = await supabase
-    .from('brands')
-    .select('id, company_name, gstin, contact_name, phone, email, state, created_at')
-    .maybeSingle()
+  // Fetch both profiles in parallel — halves latency for sellers who have no brand row.
+  const [{ data: brand }, { data: recycler }] = await Promise.all([
+    supabase
+      .from('brands')
+      .select('id, company_name, gstin, state, created_at')
+      .maybeSingle(),
+    supabase
+      .from('recyclers')
+      .select('id, company_name, cpcb_reg_no, state, capacity_mt, verified, created_at')
+      .maybeSingle(),
+  ])
 
   if (brand) {
     return {
       visitorId: userId,
-      contactName: brand.contact_name,
-      email: brand.email,
-      phone: brand.phone,
-      whatsapp: null as string | null,
       accountId: brand.id,
       companyName: brand.company_name,
       gstin: brand.gstin,
@@ -39,19 +40,9 @@ export async function getPendoMetadata() {
     }
   }
 
-  // Try recycler (seller) profile
-  const { data: recycler } = await supabase
-    .from('recyclers')
-    .select('id, company_name, cpcb_reg_no, state, capacity_mt, whatsapp, verified, created_at, contact_name')
-    .maybeSingle()
-
   if (recycler) {
     return {
       visitorId: userId,
-      contactName: recycler.contact_name,
-      email: null as string | null,
-      phone: null as string | null,
-      whatsapp: recycler.whatsapp,
       accountId: recycler.id,
       companyName: recycler.company_name,
       gstin: null as string | null,
@@ -63,6 +54,5 @@ export async function getPendoMetadata() {
     }
   }
 
-  // Authenticated but no profile yet (pre-onboarding)
   return { visitorId: userId }
 }

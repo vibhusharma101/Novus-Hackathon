@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
-import { createUserClient } from '@/lib/supabase'
+import { sellerAuth } from '@/lib/seller-auth'
+import { supabaseAdmin } from '@/lib/supabase'
 import { OrderHandshake } from '@/components/seller/order-handshake'
 import type { PlasticCategory } from '@/lib/epr/constants'
 
@@ -27,24 +27,18 @@ export default async function OrderHandshakePage({
 }: {
   params: Promise<{ id: string }>
 }) {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const session = await sellerAuth()
+  if (!session) redirect('/seller/sign-in')
 
   const { id: orderId } = await params
 
-  const supabase = await createUserClient()
-
-  // Confirm the caller is a recycler, then load the order scoped to them.
-  const { data: recycler } = await supabase.from('recyclers').select('id').single()
-  if (!recycler) redirect('/onboarding/seller')
-
-  const { data: order } = await supabase
+  const { data: order } = await supabaseAdmin
     .from('orders')
     .select(
       'id, recycler_id, category, qty_kg, price_per_kg, credits_cost, platform_fee, total, buyer_gstin, buyer_company_name, status, expires_at, created_at',
     )
     .eq('id', orderId)
-    .eq('recycler_id', recycler.id)
+    .eq('recycler_id', session.recyclerId)
     .maybeSingle<OrderRow>()
 
   if (!order) redirect('/seller/vault')

@@ -22,7 +22,7 @@ export function PendoInitializer() {
     // under the previous identity.
     if (!userId && identifiedRef.current) {
       identifiedRef.current = null
-      pendo.clearSession()
+      if (typeof pendo !== 'undefined') pendo.clearSession()
       return
     }
 

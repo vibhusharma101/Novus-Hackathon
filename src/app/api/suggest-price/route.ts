@@ -1,7 +1,8 @@
 import { generateObject } from 'ai'
 import { z } from 'zod'
 import { auth } from '@clerk/nextjs/server'
-import { createUserClient } from '@/lib/supabase'
+import { sellerAuth } from '@/lib/seller-auth'
+import { supabaseAdmin } from '@/lib/supabase'
 import { model } from '@/lib/ai'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { COST_RANGE } from '@/lib/epr/constants'
@@ -28,9 +29,11 @@ export type PriceSuggestion = z.infer<typeof suggestionSchema>
 
 export async function POST(request: Request) {
   const { userId } = await auth()
-  if (!userId) return new Response('Unauthorized', { status: 401 })
+  const sellerSession = await sellerAuth()
+  const rateLimitKey = userId ?? (sellerSession ? `seller:${sellerSession.recyclerId}` : null)
+  if (!rateLimitKey) return new Response('Unauthorized', { status: 401 })
 
-  if (!(await checkRateLimit(userId))) {
+  if (!(await checkRateLimit(rateLimitKey))) {
     return new Response('Too many requests. Please slow down.', { status: 429 })
   }
 
@@ -45,10 +48,7 @@ export async function POST(request: Request) {
 
   const { category, qty_kg } = parsed
 
-  // Live market for this category drives the suggestion. RLS "listings: read
-  // active" lets any authed user read active listings.
-  const supabase = await createUserClient()
-  const { data: active } = await supabase
+  const { data: active } = await supabaseAdmin
     .from('listings')
     .select('price_per_kg')
     .eq('status', 'active')
