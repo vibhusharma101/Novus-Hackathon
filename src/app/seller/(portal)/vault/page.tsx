@@ -1,39 +1,34 @@
 import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
-import { createUserClient } from '@/lib/supabase'
+import { sellerAuth } from '@/lib/seller-auth'
+import { supabaseAdmin } from '@/lib/supabase'
 import { SellerVault } from '@/components/seller/seller-vault'
 import type { Listing, Order } from '@/lib/db/types'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SellerVaultPage() {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const session = await sellerAuth()
+  if (!session) redirect('/seller/sign-in')
 
-  const supabase = await createUserClient()
-
-  // Own recycler row (public columns are enough for the vault header).
-  const { data: recycler } = await supabase
-    .from('recyclers')
-    .select('id, company_name, cpcb_reg_no, verified')
-    .single()
-
-  if (!recycler) redirect('/onboarding/seller')
-
-  // All own listings (any status — "listings: recycler reads own" policy) and all
-  // own orders (RLS "orders: buyer or recycler"). Both scoped to this recycler.
-  const [{ data: listings }, { data: orders }] = await Promise.all([
-    supabase
+  const [{ data: recycler }, { data: listings }, { data: orders }] = await Promise.all([
+    supabaseAdmin
+      .from('recyclers')
+      .select('id, company_name, cpcb_reg_no, verified')
+      .eq('id', session.recyclerId)
+      .single(),
+    supabaseAdmin
       .from('listings')
       .select('*')
-      .eq('recycler_id', recycler.id)
+      .eq('recycler_id', session.recyclerId)
       .order('created_at', { ascending: false }),
-    supabase
+    supabaseAdmin
       .from('orders')
       .select('*')
-      .eq('recycler_id', recycler.id)
+      .eq('recycler_id', session.recyclerId)
       .order('created_at', { ascending: false }),
   ])
+
+  if (!recycler) redirect('/seller/sign-in')
 
   return (
     <SellerVault
