@@ -120,7 +120,8 @@ export async function placeOrder(input: {
     return { ok: false, error: 'Quantity must be greater than 0.' }
   }
 
-  const supabase = await createUserClient()
+  const supabase = await createUserClient().catch(() => null)
+  if (!supabase) return { ok: false, error: 'Session expired. Please refresh the page and try again.' }
 
   // Derive buyer_id from RLS-scoped query — never from client input
   const { data: brand } = await supabase

@@ -27,7 +27,8 @@ export default async function CertificatePage({
 
   const { id: orderId } = await params
 
-  const supabase = await createUserClient()
+  const supabase = await createUserClient().catch(() => null)
+  if (!supabase) redirect('/sign-in')
 
   // Resolve this buyer's brand first so we can prove ownership of the order.
   const { data: brand } = await supabase
