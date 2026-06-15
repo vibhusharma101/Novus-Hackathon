@@ -7,16 +7,16 @@ import { cn } from '@/lib/utils'
 import { LayoutDashboard, Calculator, ArrowLeftRight } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/calculator', label: 'Calculator', icon: Calculator, exact: false },
-  { href: '/dashboard/exchange', label: 'Exchange', icon: ArrowLeftRight, exact: false },
+  { href: '/dashboard',            label: 'Dashboard', icon: LayoutDashboard, exact: true },
+  { href: '/dashboard/calculator', label: 'Calculator', icon: Calculator,      exact: false },
+  { href: '/dashboard/exchange',   label: 'Exchange',   icon: ArrowLeftRight,  exact: false },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <aside className="w-56 shrink-0 border-r flex flex-col h-screen bg-muted/40">
+    <aside className="hidden lg:flex w-56 shrink-0 border-r flex-col h-screen bg-muted/40">
       <div className="px-4 py-5 border-b">
         <span className="font-['Geist'] font-semibold text-lg text-primary">EPRx Exchange</span>
       </div>
@@ -55,5 +55,43 @@ export function Sidebar() {
         <span className="font-data text-[11px] text-on-surface-variant uppercase tracking-wide">Account</span>
       </div>
     </aside>
+  )
+}
+
+export function BuyerTopbar() {
+  return (
+    <header className="lg:hidden h-14 shrink-0 border-b border-[--color-border-zinc] bg-background flex items-center justify-between px-4">
+      <span className="font-['Geist'] font-semibold text-base text-primary">EPRx Exchange</span>
+      <UserButton
+        appearance={{
+          elements: { avatarBox: 'h-8 w-8 ring-2 ring-primary/20' },
+        }}
+      />
+    </header>
+  )
+}
+
+export function BuyerMobileNav() {
+  const pathname = usePathname()
+
+  return (
+    <nav className="lg:hidden fixed bottom-0 left-0 w-full z-40 h-16 bg-background border-t border-[--color-border-zinc] flex items-center justify-around px-4 pb-safe">
+      {navItems.map(({ href, label, icon: Icon, exact }) => {
+        const isActive = exact ? pathname === href : pathname.startsWith(href)
+        return (
+          <Link
+            key={href}
+            href={href}
+            className={cn(
+              'flex flex-col items-center justify-center gap-0.5 min-w-[56px]',
+              isActive ? 'text-primary' : 'text-muted-foreground',
+            )}
+          >
+            <Icon className="h-5 w-5" />
+            <span className="font-data text-[10px]">{label}</span>
+          </Link>
+        )
+      })}
+    </nav>
   )
 }
