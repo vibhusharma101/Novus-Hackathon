@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
-import { auth } from '@clerk/nextjs/server'
-import { createUserClient } from '@/lib/supabase'
+import { sellerAuth } from '@/lib/seller-auth'
+import { supabaseAdmin } from '@/lib/supabase'
 import { CreateListingForm } from '@/components/seller/create-listing-form'
 import { COST_RANGE, PLASTIC_CATEGORIES } from '@/lib/epr/constants'
 import type { PlasticCategory } from '@/lib/epr/constants'
@@ -10,28 +10,23 @@ export const dynamic = 'force-dynamic'
 export type MarketStat = { floor: number; avg: number; count: number }
 
 export default async function NewListingPage() {
-  const { userId } = await auth()
-  if (!userId) redirect('/sign-in')
+  const session = await sellerAuth()
+  if (!session) redirect('/seller/sign-in')
 
-  const supabase = await createUserClient()
+  const [{ data: recycler }, { data: active }] = await Promise.all([
+    supabaseAdmin
+      .from('recyclers')
+      .select('company_name, state, verified')
+      .eq('id', session.recyclerId)
+      .single(),
+    supabaseAdmin
+      .from('listings')
+      .select('category, price_per_kg')
+      .eq('status', 'active'),
+  ])
 
-  // Own recycler — for the buyer-view preview (location + verified badge).
-  const { data: recycler } = await supabase
-    .from('recyclers')
-    .select('company_name, state, verified')
-    .single()
+  if (!recycler) redirect('/seller/sign-in')
 
-  if (!recycler) redirect('/onboarding/seller')
-
-  // Live active listings drive the pricing assistant. "listings: read active"
-  // RLS lets any authed user read active listings across recyclers.
-  const { data: active } = await supabase
-    .from('listings')
-    .select('category, price_per_kg')
-    .eq('status', 'active')
-
-  // Per-category floor (min) + average. Fall back to COST_RANGE midpoint when a
-  // category has no active listings yet, so the assistant always has a benchmark.
   const stats = {} as Record<PlasticCategory, MarketStat>
   for (const cat of PLASTIC_CATEGORIES) {
     const prices = (active ?? [])

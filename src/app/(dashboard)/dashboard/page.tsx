@@ -16,10 +16,13 @@ export default async function DashboardPage() {
 
   const supabase = await createUserClient()
 
-  const [{ data: brand }, { data: liabilities }] = await Promise.all([
+  const [{ data: brand }, { data: liabilities }, { data: orders }] = await Promise.all([
     supabase.from('brands').select('company_name').maybeSingle(),
     supabase.from('liabilities').select('category, liability_kg'),
+    supabase.from('orders').select('qty_kg').eq('status', 'transferred'),
   ])
+
+  const creditsSecured = (orders ?? []).reduce((sum, o) => sum + Number(o.qty_kg), 0)
 
   const rows = (liabilities ?? []) as { category: PlasticCategory; liability_kg: number }[]
 
@@ -35,7 +38,7 @@ export default async function DashboardPage() {
     <ComplianceDashboard
       companyName={brand?.company_name ?? 'Buyer'}
       liabilities={rows}
-      creditsSecured={0}
+      creditsSecured={creditsSecured}
       daysRemaining={daysRemaining}
     />
   )
