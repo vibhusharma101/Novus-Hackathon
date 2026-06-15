@@ -26,7 +26,7 @@ export default async function HomePage() {
 function TopNav() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
-      <div className="flex justify-between items-center px-8 h-16 max-w-[1440px] mx-auto">
+      <div className="flex justify-between items-center px-4 md:px-8 h-16 max-w-[1440px] mx-auto">
         <div className="flex items-center gap-8">
           <span className="font-['JetBrains_Mono'] text-[32px] font-bold leading-10 tracking-tight text-primary">
             EPR Exchange
@@ -110,14 +110,14 @@ function HeroSection() {
   ]
 
   return (
-    <section className="pt-32 pb-16 px-8 max-w-[1440px] mx-auto blueprint-grid min-h-[716px] flex flex-col justify-center">
+    <section className="pt-24 md:pt-32 pb-16 px-4 md:px-8 max-w-[1440px] mx-auto blueprint-grid min-h-[600px] md:min-h-[716px] flex flex-col justify-center">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
         {/* left copy */}
         <div className="lg:col-span-7">
           <span className="font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] text-primary border border-primary px-2 py-1 mb-6 inline-block uppercase">
             TERMINAL ACCESS V2.4.0
           </span>
-          <h1 className="font-['Geist'] text-[64px] leading-tight font-semibold mb-6 text-on-surface">
+          <h1 className="font-['Geist'] text-[36px] sm:text-[48px] lg:text-[64px] leading-tight font-semibold mb-6 text-on-surface">
             India's only{' '}
             <span className="text-primary">zero-markup</span>{' '}
             EPR credit exchange
@@ -144,13 +144,13 @@ function HeroSection() {
         </div>
 
         {/* right cards */}
-        <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+        <div className="lg:col-span-5 grid grid-cols-2 gap-3 md:gap-4">
           {cards.map((c) => (
             <div
               key={c.label}
               className={cn(
-                'bg-surface-container-lowest p-6 border border-outline-variant hover:scale-[0.98] transition-transform',
-                c.offset
+                'bg-surface-container-lowest p-4 md:p-6 border border-outline-variant hover:scale-[0.98] transition-transform',
+                'lg:' + (c.offset || 'mt-0')
               )}
             >
               <div
@@ -209,8 +209,8 @@ function CalculatorSection() {
   ]
 
   return (
-    <section className="py-24 px-8 max-w-[1440px] mx-auto">
-      <div className="mb-12">
+    <section className="py-16 md:py-24 px-4 md:px-8 max-w-[1440px] mx-auto">
+      <div className="mb-8 md:mb-12">
         <h2 className="font-['Geist'] text-[24px] font-semibold leading-8 tracking-tight">
           EPR Liability Estimator
         </h2>
@@ -221,7 +221,7 @@ function CalculatorSection() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-outline-variant border border-outline-variant">
         {/* Left: Inputs */}
-        <div className="bg-surface p-12">
+        <div className="bg-surface p-6 md:p-12">
           <div className="mb-10">
             <h3 className="font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] text-primary uppercase mb-6">
               STEP 1: CATEGORY SELECTION
@@ -283,7 +283,7 @@ function CalculatorSection() {
         </div>
 
         {/* Right: Results */}
-        <div className="bg-surface-container-low p-12 flex flex-col">
+        <div className="bg-surface-container-low p-6 md:p-12 flex flex-col">
           <h3 className="font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] text-primary uppercase mb-8">
             REAL-TIME LIABILITY REPORT
           </h3>
@@ -350,8 +350,8 @@ const MOCK_ORDERS = [
 
 function LiveOrderBook() {
   return (
-    <section className="py-24 px-8 max-w-[1440px] mx-auto">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
+    <section className="py-16 md:py-24 px-4 md:px-8 max-w-[1440px] mx-auto">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 md:mb-8 gap-4 md:gap-6">
         <div>
           <h2 className="font-['Geist'] text-[24px] font-semibold leading-8 tracking-tight flex items-center gap-3">
             Live Order Book
@@ -361,14 +361,14 @@ function LiveOrderBook() {
             Institutional credit availability updated every 12 seconds.
           </p>
         </div>
-        <div className="flex gap-4">
-          <select className="bg-surface border border-outline-variant text-sm py-2 px-4 min-w-[160px] focus:outline-none focus:border-primary text-on-surface">
+        <div className="flex flex-col sm:flex-row gap-3">
+          <select className="bg-surface border border-outline-variant text-sm py-2 px-4 w-full sm:min-w-[160px] focus:outline-none focus:border-primary text-on-surface">
             <option>All States</option>
             <option>Maharashtra</option>
             <option>Tamil Nadu</option>
             <option>Gujarat</option>
           </select>
-          <select className="bg-surface border border-outline-variant text-sm py-2 px-4 min-w-[160px] focus:outline-none focus:border-primary text-on-surface">
+          <select className="bg-surface border border-outline-variant text-sm py-2 px-4 w-full sm:min-w-[160px] focus:outline-none focus:border-primary text-on-surface">
             <option>All Categories</option>
             <option>Cat I: Rigid</option>
             <option>Cat II: Flexible</option>
@@ -457,8 +457,8 @@ function FraudShield() {
   ]
 
   return (
-    <section className="py-24 bg-surface-container">
-      <div className="px-8 max-w-[1440px] mx-auto">
+    <section className="py-16 md:py-24 bg-surface-container">
+      <div className="px-4 md:px-8 max-w-[1440px] mx-auto">
         <div className="mb-16 text-center max-w-2xl mx-auto">
           <h2 className="font-['Geist'] text-[32px] font-semibold leading-10 mb-4">
             The Fraud Shield
@@ -499,10 +499,10 @@ function SiteFooter() {
   }
 
   return (
-    <footer className="bg-inverse-surface text-surface py-20 px-8 border-t border-outline">
+    <footer className="bg-inverse-surface text-surface py-12 md:py-20 px-4 md:px-8 border-t border-outline">
       <div className="max-w-[1440px] mx-auto">
         {/* CTA Banner */}
-        <div className="bg-primary/10 border border-primary/20 p-12 flex flex-col md:flex-row justify-between items-center mb-20 gap-8">
+        <div className="bg-primary/10 border border-primary/20 p-6 md:p-12 flex flex-col md:flex-row justify-between items-center mb-12 md:mb-20 gap-6 md:gap-8">
           <div>
             <h2 className="font-['Geist'] text-[32px] font-semibold leading-10 text-primary mb-2">
               Stop paying broker margins.
