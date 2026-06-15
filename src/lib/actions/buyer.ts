@@ -172,7 +172,6 @@ export async function placeOrder(input: {
     .single()
 
   if (error || !order) {
-    console.error('[placeOrder] Supabase insert failed:', error)
     return { ok: false, error: 'Could not place order. Please try again.' }
   }
 
