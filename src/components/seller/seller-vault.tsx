@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@clerk/nextjs'
 import {
   ShieldCheck, Boxes, Layers, Recycle, PlusCircle,
   Radio, Inbox, ArrowRight,
@@ -53,51 +52,47 @@ export function SellerVault({
   initialOrders,
 }: SellerVaultProps) {
   const router = useRouter()
-  const { getToken } = useAuth()
 
   const [orders, setOrders] = useState<Order[]>(initialOrders)
   const [flashId, setFlashId] = useState<string | null>(null)
   const channelRef = useRef<ReturnType<ReturnType<typeof getSupabaseBrowserClient>['channel']> | null>(null)
 
-  // ── Realtime: own orders ──
+  // ── Realtime: own orders (anon key — events arrive when RLS allows) ──
   useEffect(() => {
     let mounted = true
+    const sb = getSupabaseBrowserClient(null)
 
-    async function subscribe() {
-      const token = await getToken()
-      const sb = getSupabaseBrowserClient(token)
+    const channel = sb
+      .channel(`seller-orders-${recyclerId}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'orders', filter: `recycler_id=eq.${recyclerId}` },
+        (payload) => {
+          if (!mounted) return
+          const row = payload.new as Order
+          setOrders(prev => (prev.some(o => o.id === row.id) ? prev : [row, ...prev]))
+          setFlashId(row.id)
+          setTimeout(() => setFlashId(null), 2500)
+        },
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'orders', filter: `recycler_id=eq.${recyclerId}` },
+        (payload) => {
+          if (!mounted) return
+          const row = payload.new as Order
+          setOrders(prev => prev.map(o => (o.id === row.id ? { ...o, ...row } : o)))
+        },
+      )
+      .subscribe()
 
-      channelRef.current = sb
-        .channel('seller-orders')
-        .on(
-          'postgres_changes',
-          { event: 'INSERT', schema: 'public', table: 'orders', filter: `recycler_id=eq.${recyclerId}` },
-          (payload) => {
-            if (!mounted) return
-            const row = payload.new as Order
-            setOrders(prev => (prev.some(o => o.id === row.id) ? prev : [row, ...prev]))
-            setFlashId(row.id)
-            setTimeout(() => setFlashId(null), 2500)
-          },
-        )
-        .on(
-          'postgres_changes',
-          { event: 'UPDATE', schema: 'public', table: 'orders', filter: `recycler_id=eq.${recyclerId}` },
-          (payload) => {
-            if (!mounted) return
-            const row = payload.new as Order
-            setOrders(prev => prev.map(o => (o.id === row.id ? { ...o, ...row } : o)))
-          },
-        )
-        .subscribe()
-    }
+    channelRef.current = channel
 
-    subscribe()
     return () => {
       mounted = false
-      channelRef.current?.unsubscribe()
+      sb.removeChannel(channel)
     }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [recyclerId])
 
   // ── Derived data ──
   const incoming = useMemo(() => orders.filter(o => o.status === 'pending'), [orders])
