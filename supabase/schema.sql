@@ -11,19 +11,6 @@ create or replace function public.clerk_user_id() returns text
     select nullif(current_setting('request.jwt.claims', true)::json->>'sub', '')
   $$;
 
--- Helper: check if the current Clerk user owns a given recycler row.
--- SECURITY DEFINER so it can read clerk_user_id on recyclers even though
--- the column-level grant hides that column from the authenticated role.
-create or replace function public.is_own_recycler(rid uuid) returns boolean
-  language sql stable security definer
-  as $$
-    select exists(
-      select 1 from recyclers
-      where id = rid
-      and clerk_user_id = public.clerk_user_id()
-    )
-  $$;
-
 -- ============================================================
 -- TABLES
 -- ============================================================
@@ -192,15 +179,13 @@ create policy "listings: recycler reads own" on listings
     recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
--- orders: visible only to the buyer or the recycler involved.
--- Uses is_own_recycler() (SECURITY DEFINER) to read clerk_user_id on recyclers
--- without requiring that column to be in the authenticated role's column grant.
+-- orders: visible only to the buyer or the recycler involved
 drop policy if exists "orders: buyer or recycler" on orders;
 create policy "orders: buyer or recycler" on orders
   for select using (
-    buyer_id in (select id from brands where clerk_user_id = public.clerk_user_id())
+    buyer_id   in (select id from brands    where clerk_user_id = public.clerk_user_id())
     or
-    public.is_own_recycler(recycler_id)
+    recycler_id in (select id from recyclers where clerk_user_id = public.clerk_user_id())
   );
 
 drop policy if exists "orders: buyer inserts" on orders;
