@@ -1,17 +1,34 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
 import { cn } from '@/lib/utils'
-import { Boxes, PlusCircle, ShieldCheck } from 'lucide-react'
+import { Boxes, PlusCircle, ShieldCheck, LogOut } from 'lucide-react'
 
-// Only real, built routes appear in nav — no dead links.
 const navItems = [
   { href: '/seller/vault', label: 'Inventory Vault', icon: Boxes, exact: false },
 ]
 
-export function SellerSidebar() {
+function SignOutButton({ className }: { className?: string }) {
+  const router = useRouter()
+  async function handleSignOut() {
+    await fetch('/api/seller/sign-out', { method: 'POST' })
+    router.push('/seller/sign-in')
+  }
+  return (
+    <button
+      type="button"
+      onClick={handleSignOut}
+      className={cn('flex items-center gap-2 text-on-surface-variant hover:text-[--color-risk-red] transition-colors font-data text-sm', className)}
+    >
+      <LogOut className="h-4 w-4" />
+      Sign out
+    </button>
+  )
+}
+
+export function SellerSidebar({ companyName }: { companyName: string }) {
   const pathname = usePathname()
 
   return (
@@ -55,24 +72,16 @@ export function SellerSidebar() {
           <PlusCircle className="h-4 w-4" />
           Create Listing
         </Link>
-        <div className="flex items-center gap-3 px-2">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'h-8 w-8 ring-2 ring-primary/20',
-                userButtonPopoverCard: 'shadow-xl border border-[--color-border-zinc] rounded-xl',
-                userButtonPopoverActionButton: 'hover:bg-surface-container rounded-lg',
-              },
-            }}
-          />
-          <span className="font-data text-[11px] text-on-surface-variant">Account</span>
+        <div className="flex items-center justify-between px-2">
+          <span className="font-data text-[11px] text-on-surface-variant truncate max-w-[140px]">{companyName}</span>
+          <SignOutButton />
         </div>
       </div>
     </aside>
   )
 }
 
-export function SellerTopbar() {
+export function SellerTopbar({ companyName }: { companyName: string }) {
   return (
     <header className="h-14 lg:h-16 shrink-0 border-b border-[--color-border-zinc] bg-surface-container-lowest flex items-center justify-between px-4 lg:px-8">
       <span className="font-['Geist'] text-lg lg:text-xl font-bold text-primary">EPRx Terminal</span>
@@ -84,22 +93,13 @@ export function SellerTopbar() {
           <PlusCircle className="h-4 w-4" />
           Create Listing
         </Link>
-        <div className="lg:hidden">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'h-8 w-8 ring-2 ring-primary/20',
-                userButtonPopoverCard: 'shadow-xl border border-[--color-border-zinc] rounded-xl',
-              },
-            }}
-          />
-        </div>
+        <span className="hidden lg:block font-data text-xs text-on-surface-variant">{companyName}</span>
+        <SignOutButton className="hidden lg:flex" />
       </div>
     </header>
   )
 }
 
-// Mobile bottom nav — only functional destinations.
 export function SellerMobileNav() {
   const pathname = usePathname()
   const vaultActive = pathname.startsWith('/seller/vault')
@@ -124,16 +124,8 @@ export function SellerMobileNav() {
           <PlusCircle className="h-7 w-7" />
         </span>
       </Link>
-      <div className="flex flex-col items-center justify-center gap-0.5 text-on-surface-variant">
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: 'h-7 w-7 ring-2 ring-primary/20',
-              userButtonPopoverCard: 'shadow-xl border border-[--color-border-zinc] rounded-xl',
-            },
-          }}
-        />
-        <span className="font-data text-[11px]">Account</span>
+      <div className="flex flex-col items-center justify-center gap-0.5">
+        <SignOutButton />
       </div>
     </nav>
   )
