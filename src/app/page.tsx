@@ -23,7 +23,7 @@ export default async function HomePage() {
   )
 }
 
-/* â”€â”€ Top Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Top Navigation ──────────────────────────────────────── */
 function TopNav() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
@@ -71,11 +71,11 @@ function TopNav() {
   )
 }
 
-/* â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Hero ────────────────────────────────────────────────── */
 function HeroSection() {
   const cards = [
     {
-      icon: 'âœ“',
+      icon: '✓',
       iconColor: 'text-primary',
       bg: 'bg-primary/5',
       label: '100% Verified',
@@ -83,7 +83,7 @@ function HeroSection() {
       offset: '',
     },
     {
-      icon: 'â‚¹',
+      icon: '₹',
       iconColor: 'text-[--tertiary]',
       bg: 'bg-[--tertiary]/5',
       label: 'Instant Settlement',
@@ -91,7 +91,7 @@ function HeroSection() {
       offset: 'mt-8',
     },
     {
-      icon: 'â†—',
+      icon: '↗',
       iconColor: 'text-secondary',
       bg: 'bg-secondary/5',
       label: 'Market Data',
@@ -99,7 +99,7 @@ function HeroSection() {
       offset: '-mt-4',
     },
     {
-      icon: 'â—ˆ',
+      icon: '◈',
       iconColor: 'text-on-surface',
       bg: 'bg-surface-container',
       label: 'Zero Markup',
@@ -131,7 +131,7 @@ function HeroSection() {
               href="/sign-up?role=buyer"
               className="bg-primary text-on-primary px-8 py-4 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase flex items-center gap-2 hover:opacity-90 transition-opacity"
             >
-              VIEW LIVE ORDER BOOK â†’
+              VIEW LIVE ORDER BOOK →
             </Link>
             <Link
               href="/sign-up?role=seller"
@@ -171,10 +171,10 @@ function HeroSection() {
   )
 }
 
-/* â”€â”€ Marquee Ticker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Marquee Ticker ─────────────────────────────────────── */
 const TICKER_ITEMS = [
   'Brand in MH offset 3,200 kg of Rigid (Cat I)',
-  'Recycler RJ-04 listed 12,500 kg Cat II @ â‚¹24.50',
+  'Recycler RJ-04 listed 12,500 kg Cat II @ ₹24.50',
   'New Transaction: 450 MT MLP (Cat III) verified in TN',
   'Floor Price Alert: Cat I dropped 2.4% in DL/NCR',
   'Compliance Update: 84% of Q3 liabilities settled via Terminal',
@@ -198,7 +198,7 @@ function MarqueeTicker() {
   )
 }
 
-/* â”€â”€ Calculator Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Calculator Section ──────────────────────────────────── */
 function CalculatorSection() {
   const categories = [
     { code: 'CAT I', label: 'Rigid', active: true },
@@ -294,7 +294,7 @@ function CalculatorSection() {
             <div className="flex justify-between border-b border-outline-variant pb-4">
               <span className="text-sm">Estimated Market Value</span>
               <span className="font-['JetBrains_Mono'] text-[20px] font-semibold text-primary">
-                â‚¹1,10,86,250
+                ₹1,10,86,250
               </span>
             </div>
 
@@ -339,12 +339,12 @@ function CalculatorSection() {
   )
 }
 
-/* â”€â”€ Live Order Book â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Live Order Book ─────────────────────────────────────── */
 const MOCK_ORDERS = [
-  { name: 'GreenTech Solutions', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG', price: 'â‚¹22.50' },
-  { name: 'EcoPolymer India', verified: false, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG', price: 'â‚¹18.75' },
-  { name: 'Resin Works', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG', price: 'â‚¹25.10' },
-  { name: 'Bharat Recyclers', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG', price: 'â‚¹21.90' },
+  { name: 'GreenTech Solutions', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG', price: '₹22.50' },
+  { name: 'EcoPolymer India', verified: false, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG', price: '₹18.75' },
+  { name: 'Resin Works', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG', price: '₹25.10' },
+  { name: 'Bharat Recyclers', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG', price: '₹21.90' },
 ]
 
 function LiveOrderBook() {
@@ -429,25 +429,25 @@ function LiveOrderBook() {
   )
 }
 
-/* â”€â”€ Fraud Shield â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Fraud Shield ────────────────────────────────────────── */
 function FraudShield() {
   const cards = [
     {
-      icon: 'âš–',
+      icon: '⚖',
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
       title: 'Institutional Escrow',
       desc: 'Funds are only released to recyclers once the CPCB portal generates a verified certificate matching the order quantity and category. Your capital is never at risk.',
     },
     {
-      icon: 'â‡„',
+      icon: '⇄',
       iconBg: 'bg-secondary/10',
       iconColor: 'text-secondary',
       title: 'Split-Order Optimization',
       desc: 'Our engine automatically splits large buy orders across multiple verified recyclers to ensure 100% fulfillment at the lowest possible volume-weighted average price.',
     },
     {
-      icon: 'âœ“',
+      icon: '✓',
       iconBg: 'bg-[--tertiary]/10',
       iconColor: 'text-[--tertiary]',
       title: 'Compliance Badges',
@@ -489,7 +489,7 @@ function FraudShield() {
   )
 }
 
-/* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Footer ──────────────────────────────────────────────── */
 function SiteFooter() {
   const footerLinks = {
     TERMINAL: ['Marketplace', 'Order Book', 'Yield Terminal', 'API Access'],
