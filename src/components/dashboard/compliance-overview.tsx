@@ -24,7 +24,8 @@ const CAT_ORDER: PlasticCategory[] = ['rigid', 'flexible', 'mlp']
 // ─── Donut chart ──────────────────────────────────────────────────────────────
 
 function ComplianceDonut({ pct }: { pct: number }) {
-  const dasharray = `${pct} ${100 - pct}`
+  const clamped = Math.min(pct, 100)
+  const dasharray = `${clamped} ${100 - clamped}`
   const color =
     pct >= 80 ? '#006948' :
     pct >= 50 ? '#4648d4' :
@@ -67,7 +68,7 @@ function ComplianceDonut({ pct }: { pct: number }) {
           className="text-[28px] md:text-[42px] font-['Geist'] font-bold leading-none"
           style={{ color }}
         >
-          {pct}%
+          {Math.min(pct, 100)}%
         </span>
         <span className="font-data text-[10px] text-outline uppercase tracking-widest mt-1">Compliant</span>
         <span className={cn('font-data text-xs font-bold mt-1', statusColor)}>
@@ -84,6 +85,7 @@ export interface ComplianceDashboardProps {
   companyName: string
   liabilities: LiabilityRow[]
   creditsSecured: number
+  creditsByCategory: Record<string, number>
   daysRemaining: number
 }
 
@@ -91,14 +93,16 @@ export function ComplianceDashboard({
   companyName,
   liabilities,
   creditsSecured,
+  creditsByCategory,
   daysRemaining,
 }: ComplianceDashboardProps) {
   const router = useRouter()
 
   const totalLiabilityKg = liabilities.reduce((s, r) => s + r.liability_kg, 0)
+  const effectiveSecured = Math.min(creditsSecured, totalLiabilityKg)
   const deficitKg = Math.max(0, totalLiabilityKg - creditsSecured)
   const compliancePct =
-    totalLiabilityKg > 0 ? Math.round((creditsSecured / totalLiabilityKg) * 100) : 0
+    totalLiabilityKg > 0 ? Math.round((effectiveSecured / totalLiabilityKg) * 100) : 0
 
   const liabilityByCategory = Object.fromEntries(
     liabilities.map(r => [r.category, r.liability_kg])
@@ -154,14 +158,14 @@ export function ComplianceDashboard({
               <div className="space-y-4">
                 {CAT_ORDER.map(cat => {
                   const liabilityKg = liabilityByCategory[cat] ?? 0
-                  // wire per-category secured kg here when orders land (B7)
-                  const pct = 0
+                  const securedKg = Math.min(creditsByCategory[cat] ?? 0, liabilityKg)
+                  const pct = liabilityKg > 0 ? Math.min(Math.round((securedKg / liabilityKg) * 100), 100) : 0
                   return (
                     <div key={cat} className="space-y-1.5">
                       <div className="flex justify-between font-data text-[11px] uppercase tracking-tight">
                         <span className="text-on-surface-variant">{CAT_LABELS[cat]}</span>
                         <span className="text-on-surface">
-                          0 / {intl.format(Math.round(liabilityKg))} kg
+                          {intl.format(Math.round(securedKg))} / {intl.format(Math.round(liabilityKg))} kg
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
