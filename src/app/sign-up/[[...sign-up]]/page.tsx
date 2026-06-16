@@ -25,7 +25,9 @@ function SignUpInner() {
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#006948] text-white">
         <div>
           <div className="mb-12">
-            <Image src="/logo.jpg" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain brightness-0 invert" />
+            <div className="bg-white rounded-xl p-2 inline-flex">
+              <Image src="/logo.jpg" alt="Recyclink" width={48} height={48} className="h-10 w-10 object-contain" />
+            </div>
           </div>
           <h1 className="font-['Geist'] text-4xl font-bold leading-tight mb-4">
             Join India&apos;s EPR<br />compliance network.

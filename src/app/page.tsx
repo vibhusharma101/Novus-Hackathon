@@ -521,7 +521,9 @@ function SiteFooter() {
         {/* Links grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
           <div className="space-y-6">
-            <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain brightness-0 invert" />
+            <div className="bg-white rounded-xl p-1.5 inline-flex">
+              <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-8 w-8 object-contain" />
+            </div>
             <p className="text-sm text-surface-variant max-w-[240px] leading-relaxed">
               India's premier institutional terminal for environmental responsibility credit
               management.
