@@ -515,15 +515,9 @@ function SiteFooter() {
             </Link>
             <Link
               href="/seller/sign-in"
-              className="border border-primary text-primary px-6 py-3 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase hover:bg-primary/10 transition-colors text-center"
+              className="border border-white text-white px-6 py-3 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase hover:bg-white/10 transition-colors text-center"
             >
               Sign in as Seller
-            </Link>
-            <Link
-              href="/sign-up?role=buyer"
-              className="border border-surface-variant text-surface-variant px-6 py-3 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase hover:border-primary hover:text-primary transition-colors text-center"
-            >
-              Create Account
             </Link>
           </div>
         </div>
