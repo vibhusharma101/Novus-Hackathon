@@ -3,16 +3,30 @@
 import { useRouter } from 'next/navigation'
 import {
   AlertTriangle, Wallet, ShieldCheck, TrendingDown,
-  ClipboardList, ArrowRight,
+  ClipboardList, ArrowRight, CheckCircle2, Clock, XCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { PlasticCategory } from '@/lib/epr/constants'
 
-const intl = new Intl.NumberFormat('en-IN')
-const fmtKg = (n: number) => `${intl.format(Math.round(n))} kg`
-const fmtMt = (n: number) => `${(n / 1000).toFixed(2)} MT`
+const intl    = new Intl.NumberFormat('en-IN')
+const intlRs  = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+const fmtKg   = (n: number) => `${intl.format(Math.round(n))} kg`
+const fmtMt   = (n: number) => `${(n / 1000).toFixed(2)} MT`
+const fmtRs   = (n: number) => `₹${intlRs.format(n)}`
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 
 type LiabilityRow = { category: PlasticCategory; liability_kg: number }
+
+type RecentOrder = {
+  id: string
+  category: PlasticCategory
+  qty_kg: number
+  price_per_kg: number
+  total: number
+  status: string
+  created_at: string
+  recyclers: { company_name: string } | null
+}
 
 const CAT_LABELS: Record<PlasticCategory, string> = {
   rigid: 'Rigid Plastic',
@@ -24,7 +38,8 @@ const CAT_ORDER: PlasticCategory[] = ['rigid', 'flexible', 'mlp']
 // ─── Donut chart ──────────────────────────────────────────────────────────────
 
 function ComplianceDonut({ pct }: { pct: number }) {
-  const dasharray = `${pct} ${100 - pct}`
+  const clamped = Math.min(pct, 100)
+  const dasharray = `${clamped} ${100 - clamped}`
   const color =
     pct >= 80 ? '#006948' :
     pct >= 50 ? '#4648d4' :
@@ -67,7 +82,7 @@ function ComplianceDonut({ pct }: { pct: number }) {
           className="text-[28px] md:text-[42px] font-['Geist'] font-bold leading-none"
           style={{ color }}
         >
-          {pct}%
+          {Math.min(pct, 100)}%
         </span>
         <span className="font-data text-[10px] text-outline uppercase tracking-widest mt-1">Compliant</span>
         <span className={cn('font-data text-xs font-bold mt-1', statusColor)}>
@@ -84,6 +99,8 @@ export interface ComplianceDashboardProps {
   companyName: string
   liabilities: LiabilityRow[]
   creditsSecured: number
+  creditsByCategory: Record<string, number>
+  recentOrders: RecentOrder[]
   daysRemaining: number
 }
 
@@ -91,14 +108,17 @@ export function ComplianceDashboard({
   companyName,
   liabilities,
   creditsSecured,
+  creditsByCategory,
+  recentOrders,
   daysRemaining,
 }: ComplianceDashboardProps) {
   const router = useRouter()
 
   const totalLiabilityKg = liabilities.reduce((s, r) => s + r.liability_kg, 0)
+  const effectiveSecured = Math.min(creditsSecured, totalLiabilityKg)
   const deficitKg = Math.max(0, totalLiabilityKg - creditsSecured)
   const compliancePct =
-    totalLiabilityKg > 0 ? Math.round((creditsSecured / totalLiabilityKg) * 100) : 0
+    totalLiabilityKg > 0 ? Math.round((effectiveSecured / totalLiabilityKg) * 100) : 0
 
   const liabilityByCategory = Object.fromEntries(
     liabilities.map(r => [r.category, r.liability_kg])
@@ -154,14 +174,14 @@ export function ComplianceDashboard({
               <div className="space-y-4">
                 {CAT_ORDER.map(cat => {
                   const liabilityKg = liabilityByCategory[cat] ?? 0
-                  // wire per-category secured kg here when orders land (B7)
-                  const pct = 0
+                  const securedKg = Math.min(creditsByCategory[cat] ?? 0, liabilityKg)
+                  const pct = liabilityKg > 0 ? Math.min(Math.round((securedKg / liabilityKg) * 100), 100) : 0
                   return (
                     <div key={cat} className="space-y-1.5">
                       <div className="flex justify-between font-data text-[11px] uppercase tracking-tight">
                         <span className="text-on-surface-variant">{CAT_LABELS[cat]}</span>
                         <span className="text-on-surface">
-                          0 / {intl.format(Math.round(liabilityKg))} kg
+                          {intl.format(Math.round(securedKg))} / {intl.format(Math.round(liabilityKg))} kg
                         </span>
                       </div>
                       <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -262,25 +282,93 @@ export function ComplianceDashboard({
           <h3 className="font-['Geist'] text-[18px] font-semibold text-on-surface">Recent Transactions</h3>
           <span className="font-data text-[11px] text-outline uppercase tracking-wide">Fiscal Year 2024–25</span>
         </div>
-        <div className="min-h-72 flex flex-col items-center justify-center p-6 md:p-12 text-center">
-          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 border border-[--color-border-zinc]">
-            <ClipboardList className="h-7 w-7 text-outline" />
+
+        {recentOrders.length === 0 ? (
+          <div className="min-h-72 flex flex-col items-center justify-center p-6 md:p-12 text-center">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 border border-[--color-border-zinc]">
+              <ClipboardList className="h-7 w-7 text-outline" />
+            </div>
+            <h4 className="font-['Geist'] text-[18px] font-semibold text-on-surface mb-2">
+              No recent transactions found
+            </h4>
+            <p className="text-sm text-on-surface-variant max-w-md mb-6 leading-relaxed">
+              Your trade history is currently empty. Visit the Marketplace to secure credits and
+              fulfil your EPR obligations before the deadline.
+            </p>
+            <button
+              type="button"
+              onClick={() => router.push('/dashboard/exchange')}
+              className="px-6 py-2 border border-primary text-primary hover:bg-success-emerald-light rounded-lg font-data text-sm font-bold transition-all active:scale-[0.98]"
+            >
+              Visit Marketplace
+            </button>
           </div>
-          <h4 className="font-['Geist'] text-[18px] font-semibold text-on-surface mb-2">
-            No recent transactions found
-          </h4>
-          <p className="text-sm text-on-surface-variant max-w-md mb-6 leading-relaxed">
-            Your trade history is currently empty. Visit the Marketplace to secure credits and
-            fulfil your EPR obligations before the deadline.
-          </p>
-          <button
-            type="button"
-            onClick={() => router.push('/dashboard/exchange')}
-            className="px-6 py-2 border border-primary text-primary hover:bg-success-emerald-light rounded-lg font-data text-sm font-bold transition-all active:scale-[0.98]"
-          >
-            Visit Marketplace
-          </button>
-        </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[--color-border-zinc] bg-slate-50">
+                  <th className="px-4 py-3 text-left font-data text-[10px] text-outline uppercase tracking-widest">Date</th>
+                  <th className="px-4 py-3 text-left font-data text-[10px] text-outline uppercase tracking-widest">Recycler</th>
+                  <th className="px-4 py-3 text-left font-data text-[10px] text-outline uppercase tracking-widest">Category</th>
+                  <th className="px-4 py-3 text-right font-data text-[10px] text-outline uppercase tracking-widest">Volume</th>
+                  <th className="px-4 py-3 text-right font-data text-[10px] text-outline uppercase tracking-widest">Total</th>
+                  <th className="px-4 py-3 text-center font-data text-[10px] text-outline uppercase tracking-widest">Status</th>
+                  <th className="px-4 py-3" />
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[--color-border-zinc]">
+                {recentOrders.map(order => {
+                  const statusMeta = {
+                    transferred: { label: 'Settled',  icon: CheckCircle2, color: 'text-primary'             },
+                    pending:     { label: 'Pending',  icon: Clock,         color: 'text-amber-600'           },
+                    declined:    { label: 'Declined', icon: XCircle,       color: 'text-[--color-risk-red]'  },
+                    expired:     { label: 'Expired',  icon: XCircle,       color: 'text-outline'             },
+                  }[order.status] ?? { label: order.status, icon: Clock, color: 'text-outline' }
+                  const StatusIcon = statusMeta.icon
+                  return (
+                    <tr key={order.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-4 py-3 font-data text-[11px] text-on-surface-variant whitespace-nowrap">
+                        {fmtDate(order.created_at)}
+                      </td>
+                      <td className="px-4 py-3 font-data text-[12px] text-on-surface max-w-[140px] truncate">
+                        {order.recyclers?.company_name ?? '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="font-data text-[10px] px-2 py-0.5 bg-surface-container border border-[--color-border-zinc] rounded uppercase tracking-wider">
+                          {CAT_LABELS[order.category] ?? order.category}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-right font-data text-[12px] text-on-surface whitespace-nowrap">
+                        {fmtKg(order.qty_kg)}
+                      </td>
+                      <td className="px-4 py-3 text-right font-data text-[12px] font-semibold text-on-surface whitespace-nowrap">
+                        {fmtRs(order.total)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className={cn('flex items-center justify-center gap-1', statusMeta.color)}>
+                          <StatusIcon className="h-3.5 w-3.5" />
+                          <span className="font-data text-[10px] font-semibold uppercase tracking-wide">{statusMeta.label}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {order.status === 'transferred' && (
+                          <button
+                            type="button"
+                            onClick={() => router.push(`/dashboard/orders/${order.id}/certificate`)}
+                            className="font-data text-[10px] text-primary hover:underline uppercase tracking-wide whitespace-nowrap"
+                          >
+                            View cert
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
     </div>

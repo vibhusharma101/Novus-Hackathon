@@ -6,6 +6,8 @@ import { DefaultChatTransport } from 'ai'
 import { useRouter } from 'next/navigation'
 import { Sparkles, X, ArrowUp, ShoppingCart, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 const AGENT_ID = process.env.NEXT_PUBLIC_PENDO_AGENT_ID ?? ''
 
@@ -17,32 +19,88 @@ const SUGGESTIONS = [
   'Summarize my compliance status',
 ]
 
-// Splits assistant text into renderable segments, turning [[buy:<id>]] markers
-// into checkout buttons.
-function renderText(text: string, onBuy: (id: string) => void) {
-  const out: React.ReactNode[] = []
-  let last = 0
-  let m: RegExpExecArray | null
-  BUY_RE.lastIndex = 0
-  let key = 0
-  while ((m = BUY_RE.exec(text)) !== null) {
-    if (m.index > last) out.push(<span key={key++}>{text.slice(last, m.index)}</span>)
-    const id = m[1]
-    out.push(
-      <button
-        key={key++}
-        type="button"
-        onClick={() => onBuy(id)}
-        className="inline-flex items-center gap-1 my-1 bg-primary text-on-primary px-2.5 py-1 rounded font-data text-[11px] font-semibold hover:bg-primary-container transition-colors align-middle"
-      >
-        <ShoppingCart className="h-3 w-3" />
-        Buy this
-      </button>,
-    )
-    last = m.index + m[0].length
-  }
-  if (last < text.length) out.push(<span key={key++}>{text.slice(last)}</span>)
-  return out
+// Pre-process text: replace [[buy:id]] with a placeholder token that survives
+// markdown parsing, then swap back into Buy buttons in the custom renderer.
+const BUY_PLACEHOLDER = (id: string) => `%%BUY:${id}%%`
+const BUY_PLACEHOLDER_RE = /%%BUY:([a-zA-Z0-9-]+)%%/g
+
+function preprocessBuyMarkers(text: string): string {
+  return text.replace(BUY_RE, (_, id) => BUY_PLACEHOLDER(id))
+}
+
+function AssistantMessage({ text, onBuy }: { text: string; onBuy: (id: string) => void }) {
+  const processed = preprocessBuyMarkers(text)
+
+  return (
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      components={{
+        // Headings
+        h1: ({ children }) => <p className="font-['Geist'] font-bold text-[14px] text-on-surface mt-2 mb-1">{children}</p>,
+        h2: ({ children }) => <p className="font-['Geist'] font-bold text-[13px] text-on-surface mt-2 mb-1">{children}</p>,
+        h3: ({ children }) => <p className="font-['Geist'] font-semibold text-[13px] text-on-surface mt-1.5 mb-0.5">{children}</p>,
+        // Paragraphs
+        p: ({ children }) => <p className="mb-1.5 last:mb-0 text-[13px] leading-relaxed">{children}</p>,
+        // Bold / italic
+        strong: ({ children }) => <strong className="font-semibold text-on-surface">{children}</strong>,
+        em: ({ children }) => <em className="italic">{children}</em>,
+        // Unordered list
+        ul: ({ children }) => <ul className="pl-4 space-y-0.5 mb-1.5 list-disc">{children}</ul>,
+        ol: ({ children }) => <ol className="pl-4 space-y-0.5 mb-1.5 list-decimal">{children}</ol>,
+        li: ({ children }) => <li className="text-[13px] leading-relaxed">{children}</li>,
+        // Inline code
+        code: ({ children, className }) =>
+          className ? (
+            <pre className="bg-surface-container-low rounded p-2 text-[11px] overflow-x-auto my-1.5"><code>{children}</code></pre>
+          ) : (
+            <code className="bg-surface-container-low px-1 py-0.5 rounded text-[11px] font-mono">{children}</code>
+          ),
+        // Table (GFM)
+        table: ({ children }) => (
+          <div className="overflow-x-auto my-2 rounded border border-[--color-border-zinc]">
+            <table className="w-full text-[12px] border-collapse">{children}</table>
+          </div>
+        ),
+        thead: ({ children }) => <thead className="bg-surface-container">{children}</thead>,
+        tbody: ({ children }) => <tbody className="divide-y divide-[--color-border-zinc]">{children}</tbody>,
+        tr: ({ children }) => <tr className="divide-x divide-[--color-border-zinc]">{children}</tr>,
+        th: ({ children }) => <th className="px-3 py-2 text-left font-data text-[10px] uppercase tracking-wide text-on-surface-variant font-semibold">{children}</th>,
+        td: ({ children }) => <td className="px-3 py-2 text-on-surface">{children}</td>,
+        // Horizontal rule
+        hr: () => <hr className="border-[--color-border-zinc] my-2" />,
+        // Plain text — intercept [[buy:id]] placeholders
+        text: ({ children }) => {
+          const str = String(children)
+          if (!BUY_PLACEHOLDER_RE.test(str)) return <>{str}</>
+          BUY_PLACEHOLDER_RE.lastIndex = 0
+          const parts: React.ReactNode[] = []
+          let last = 0
+          let m: RegExpExecArray | null
+          let key = 0
+          while ((m = BUY_PLACEHOLDER_RE.exec(str)) !== null) {
+            if (m.index > last) parts.push(<span key={key++}>{str.slice(last, m.index)}</span>)
+            const id = m[1]
+            parts.push(
+              <button
+                key={key++}
+                type="button"
+                onClick={() => onBuy(id)}
+                className="inline-flex items-center gap-1 my-1 bg-primary text-on-primary px-2.5 py-1 rounded font-data text-[11px] font-semibold hover:bg-primary-container transition-colors align-middle"
+              >
+                <ShoppingCart className="h-3 w-3" />
+                Buy this
+              </button>,
+            )
+            last = m.index + m[0].length
+          }
+          if (last < str.length) parts.push(<span key={key++}>{str.slice(last)}</span>)
+          return <>{parts}</>
+        },
+      }}
+    >
+      {processed}
+    </ReactMarkdown>
+  )
 }
 
 export function CopilotPanel() {
@@ -128,7 +186,7 @@ export function CopilotPanel() {
           'fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95',
           open ? 'bg-inverse-surface text-white' : 'bg-primary text-on-primary hover:bg-primary-container',
         )}
-        aria-label={open ? 'Close copilot' : 'Open EPRx Copilot'}
+        aria-label={open ? 'Close copilot' : 'Open Recyclink Copilot'}
       >
         {open ? <X className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
       </button>
@@ -142,7 +200,7 @@ export function CopilotPanel() {
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="font-['Geist'] text-sm font-semibold text-on-surface">EPRx Copilot</p>
+              <p className="font-['Geist'] text-sm font-semibold text-on-surface">Recyclink Copilot</p>
               <p className="font-data text-[10px] text-on-surface-variant uppercase tracking-wide">Grounded in your live market</p>
             </div>
           </div>
@@ -173,14 +231,18 @@ export function CopilotPanel() {
               <div key={m.id} className={cn('flex', m.role === 'user' ? 'justify-end' : 'justify-start')}>
                 <div
                   className={cn(
-                    'max-w-[85%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed whitespace-pre-wrap',
+                    'max-w-[92%] rounded-2xl px-3.5 py-2.5 text-[13px]',
                     m.role === 'user'
                       ? 'bg-primary text-on-primary rounded-br-sm'
                       : 'bg-surface-container text-on-surface rounded-bl-sm',
                   )}
                 >
                   {m.parts.map((part, i) =>
-                    part.type === 'text' ? <span key={i}>{m.role === 'assistant' ? renderText(part.text, goBuy) : part.text}</span> : null,
+                    part.type === 'text'
+                      ? m.role === 'assistant'
+                        ? <AssistantMessage key={i} text={part.text} onBuy={goBuy} />
+                        : <span key={i} className="text-[13px] leading-relaxed">{part.text}</span>
+                      : null,
                   )}
                 </div>
               </div>

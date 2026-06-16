@@ -124,7 +124,7 @@ export function CheckoutForm({ listing, recycler, brand, defaultQtyKg }: Checkou
         >
           <ArrowLeft className="h-5 w-5 text-on-surface-variant" />
         </button>
-        <span className="font-['Geist'] font-bold text-primary text-base flex-1 text-center">EPRx</span>
+        <span className="font-['Geist'] font-bold text-primary text-base flex-1 text-center">Recyclink</span>
         <div className="flex items-center gap-1 text-[10px] font-data border border-[--color-outline-variant] px-1.5 py-0.5 rounded text-on-surface-variant uppercase tracking-widest">
           <ShieldCheck className="h-3 w-3" />
           Secure

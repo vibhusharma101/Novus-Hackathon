@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     .join('\n') || '- No active listings in the market right now.'
 
   const system = [
-    `You are the EPRx Copilot, an assistant for ${brand?.company_name ?? 'a buyer'} on an Indian EPR (Extended Producer Responsibility) plastic-credit marketplace.`,
+    `You are the Recyclink Copilot, an assistant for ${brand?.company_name ?? 'a buyer'} on an Indian EPR (Extended Producer Responsibility) plastic-credit marketplace.`,
     `Your job: help the buyer close their EPR compliance deficit by recommending specific, real listings from the live market below. Be concise and practical.`,
     ``,
     `BUYER LIABILITY (credits they must acquire, by category):`,
