@@ -128,7 +128,7 @@ export function CopilotPanel() {
           'fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-all active:scale-95',
           open ? 'bg-inverse-surface text-white' : 'bg-primary text-on-primary hover:bg-primary-container',
         )}
-        aria-label={open ? 'Close copilot' : 'Open EPRx Copilot'}
+        aria-label={open ? 'Close copilot' : 'Open Recyclink Copilot'}
       >
         {open ? <X className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
       </button>
@@ -142,7 +142,7 @@ export function CopilotPanel() {
               <Sparkles className="h-4 w-4 text-primary" />
             </div>
             <div>
-              <p className="font-['Geist'] text-sm font-semibold text-on-surface">EPRx Copilot</p>
+              <p className="font-['Geist'] text-sm font-semibold text-on-surface">Recyclink Copilot</p>
               <p className="font-data text-[10px] text-on-surface-variant uppercase tracking-wide">Grounded in your live market</p>
             </div>
           </div>

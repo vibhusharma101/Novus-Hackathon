@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { UserButton } from '@clerk/nextjs'
@@ -18,7 +19,7 @@ export function Sidebar() {
   return (
     <aside className="hidden lg:flex w-56 shrink-0 border-r flex-col h-screen bg-muted/40">
       <div className="px-4 py-5 border-b">
-        <span className="font-['Geist'] font-semibold text-lg text-primary">EPRx Exchange</span>
+        <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
       </div>
 
       <nav className="flex-1 px-2 py-4 space-y-1">
@@ -61,7 +62,7 @@ export function Sidebar() {
 export function BuyerTopbar() {
   return (
     <header className="lg:hidden h-14 shrink-0 border-b border-[--color-border-zinc] bg-background flex items-center justify-between px-4">
-      <span className="font-['Geist'] font-semibold text-base text-primary">EPRx Exchange</span>
+      <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
       <UserButton
         appearance={{
           elements: { avatarBox: 'h-8 w-8 ring-2 ring-primary/20' },

@@ -1,12 +1,13 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { Lock, ShieldCheck } from 'lucide-react'
+import { Lock } from 'lucide-react'
 import { SellerOnboardingForm } from '@/components/onboarding/seller-form'
 
 export const metadata: Metadata = {
-  title: 'Seller Registration | EPRx Exchange',
+  title: 'Seller Registration | Recyclink',
   description: 'Register your recycling facility to list EPR credits on the exchange.',
 }
 
@@ -20,11 +21,8 @@ export default async function SellerOnboardingPage() {
         <div className="max-w-[640px] w-full flex flex-col items-center">
           {/* Brand anchor */}
           <div className="mb-10 text-center">
-            <div className="inline-flex items-center gap-2 mb-4">
-              <ShieldCheck className="h-8 w-8 text-primary" />
-              <span className="font-['Geist'] text-2xl font-semibold tracking-tight text-primary">
-                EPRx Exchange
-              </span>
+            <div className="mb-4">
+              <Image src="/logo.png" alt="Recyclink" width={56} height={56} className="h-14 w-14 object-contain mx-auto" />
             </div>
             <h1 className="font-['Geist'] text-2xl font-semibold tracking-tight text-on-surface mb-2">
               Seller Registration
@@ -78,7 +76,7 @@ export default async function SellerOnboardingPage() {
       <footer className="w-full py-8 px-8 mt-auto border-t border-[--color-border-zinc] bg-white">
         <div className="max-w-[1440px] mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
           <span className="font-data text-[11px] text-outline">
-            © 2026 EPRx Exchange India. SECURE TERMINAL v2.4.0
+            © 2026 Recyclink India. SECURE TERMINAL v2.4.0
           </span>
           <div className="flex gap-6">
             <Link href="/" className="text-xs text-on-surface-variant hover:text-primary transition-colors">

@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { SignIn } from '@clerk/nextjs'
 import { ShieldCheck, Zap, Lock } from 'lucide-react'
 
@@ -10,11 +11,8 @@ export default function SignInPage() {
       {/* Brand panel — desktop only */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#006948] text-white">
         <div>
-          <div className="flex items-center gap-2 mb-12">
-            <div className="w-8 h-8 rounded-full border-2 border-white/60 flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full bg-white" />
-            </div>
-            <span className="font-['Geist'] text-xl font-bold tracking-tight">Recylink</span>
+          <div className="mb-12">
+            <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain brightness-0 invert" />
           </div>
           <h1 className="font-['Geist'] text-4xl font-bold leading-tight mb-4">
             India&apos;s only<br />zero-markup EPR<br />credit exchange.
@@ -46,11 +44,8 @@ export default function SignInPage() {
       {/* Auth panel */}
       <div className="flex flex-col items-center justify-center p-6 min-h-screen lg:min-h-0">
         {/* Mobile logo */}
-        <div className="flex items-center gap-2 mb-8 lg:hidden">
-          <div className="w-7 h-7 rounded-full border-2 border-[#006948] flex items-center justify-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#006948]" />
-          </div>
-          <span className="font-['Geist'] text-lg font-bold text-[#006948]">Recylink</span>
+        <div className="mb-8 lg:hidden">
+          <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain" />
         </div>
         <SignIn />
       </div>

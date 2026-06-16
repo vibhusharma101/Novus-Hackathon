@@ -6,7 +6,7 @@ import { ComplianceDashboard } from '@/components/dashboard/compliance-overview'
 import type { PlasticCategory } from '@/lib/epr/constants'
 
 export const metadata: Metadata = {
-  title: 'Compliance Dashboard | EPRx Exchange',
+  title: 'Compliance Dashboard | Recyclink',
   description: 'Monitor your EPR compliance status and credit deficit.',
 }
 

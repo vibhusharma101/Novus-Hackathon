@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
@@ -28,9 +29,7 @@ function TopNav() {
     <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
       <div className="flex justify-between items-center px-4 md:px-8 h-16 max-w-[1440px] mx-auto">
         <div className="flex items-center gap-8">
-          <span className="font-['JetBrains_Mono'] text-[32px] font-bold leading-10 tracking-tight text-primary">
-            EPR Exchange
-          </span>
+          <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain" />
           <div className="hidden md:flex gap-6">
             {[
               { label: 'Marketplace', active: true },
@@ -508,7 +507,7 @@ function SiteFooter() {
               Stop paying broker margins.
             </h2>
             <p className="text-base text-surface-variant">
-              Join 1,200+ brands trading directly on EPRx.
+              Join 1,200+ brands trading directly on Recyclink.
             </p>
           </div>
           <Link
@@ -522,9 +521,7 @@ function SiteFooter() {
         {/* Links grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
           <div className="space-y-6">
-            <div className="font-['JetBrains_Mono'] text-[20px] font-semibold text-inverse-primary">
-              EPR Exchange
-            </div>
+            <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain brightness-0 invert" />
             <p className="text-sm text-surface-variant max-w-[240px] leading-relaxed">
               India's premier institutional terminal for environmental responsibility credit
               management.
@@ -554,7 +551,7 @@ function SiteFooter() {
         {/* Bottom bar */}
         <div className="border-t border-outline/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="font-['JetBrains_Mono'] text-[13px] text-surface-variant">
-            © 2026 EPR Exchange India. SECURE TERMINAL v2.4.0
+            © 2026 Recyclink India. SECURE TERMINAL v2.4.0
           </div>
           <div className="flex gap-6 items-center">
             <span className="flex items-center gap-2 font-['JetBrains_Mono'] text-[13px] text-primary">

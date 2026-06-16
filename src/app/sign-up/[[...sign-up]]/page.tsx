@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { Suspense, useEffect } from 'react'
 import { SignUp } from '@clerk/nextjs'
 import { useSearchParams, useRouter } from 'next/navigation'
@@ -23,11 +24,8 @@ function SignUpInner() {
       {/* Brand panel — desktop only */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#006948] text-white">
         <div>
-          <div className="flex items-center gap-2 mb-12">
-            <div className="w-8 h-8 rounded-full border-2 border-white/60 flex items-center justify-center">
-              <div className="w-3 h-3 rounded-full bg-white" />
-            </div>
-            <span className="font-['Geist'] text-xl font-bold tracking-tight">Recylink</span>
+          <div className="mb-12">
+            <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain brightness-0 invert" />
           </div>
           <h1 className="font-['Geist'] text-4xl font-bold leading-tight mb-4">
             Join India&apos;s EPR<br />compliance network.
@@ -59,11 +57,8 @@ function SignUpInner() {
       {/* Auth panel */}
       <div className="flex flex-col items-center justify-center p-6 min-h-screen lg:min-h-0">
         {/* Mobile logo */}
-        <div className="flex items-center gap-2 mb-8 lg:hidden">
-          <div className="w-7 h-7 rounded-full border-2 border-[#006948] flex items-center justify-center">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#006948]" />
-          </div>
-          <span className="font-['Geist'] text-lg font-bold text-[#006948]">Recylink</span>
+        <div className="mb-8 lg:hidden">
+          <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain" />
         </div>
         <SignUp signInUrl="/sign-in" forceRedirectUrl={redirectUrl} />
       </div>

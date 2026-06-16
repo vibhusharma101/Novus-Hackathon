@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
@@ -37,10 +38,7 @@ export function SellerSidebar({ companyName }: { companyName: string }) {
         <div className="w-9 h-9 bg-primary-container rounded-lg flex items-center justify-center">
           <ShieldCheck className="h-5 w-5 text-on-primary" />
         </div>
-        <div>
-          <h1 className="font-['Geist'] text-base font-bold text-primary leading-tight">Recycler Hub</h1>
-          <p className="font-data text-[10px] text-outline uppercase tracking-wide">EPRx Terminal</p>
-        </div>
+        <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -84,7 +82,7 @@ export function SellerSidebar({ companyName }: { companyName: string }) {
 export function SellerTopbar({ companyName }: { companyName: string }) {
   return (
     <header className="h-14 lg:h-16 shrink-0 border-b border-[--color-border-zinc] bg-surface-container-lowest flex items-center justify-between px-4 lg:px-8">
-      <span className="font-['Geist'] text-lg lg:text-xl font-bold text-primary">EPRx Terminal</span>
+      <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
       <div className="flex items-center gap-3">
         <Link
           href="/seller/listings/new"

@@ -1,8 +1,9 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ShieldCheck, Recycle, Loader2 } from 'lucide-react'
+import { ShieldCheck, Loader2 } from 'lucide-react'
 
 export default function SellerSignInPage() {
   const router = useRouter()
@@ -34,9 +35,8 @@ export default function SellerSignInPage() {
       {/* Brand panel */}
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#006948] text-white">
         <div>
-          <div className="flex items-center gap-2 mb-12">
-            <Recycle className="h-7 w-7" />
-            <span className="font-['Geist'] text-xl font-bold tracking-tight">EPRx — Seller Portal</span>
+          <div className="mb-12">
+            <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain brightness-0 invert" />
           </div>
           <h1 className="font-['Geist'] text-4xl font-bold leading-tight mb-4">
             Monetise your<br />certified EPR<br />credits.
@@ -67,9 +67,8 @@ export default function SellerSignInPage() {
       {/* Form panel */}
       <div className="flex flex-col items-center justify-center p-6 min-h-screen lg:min-h-0">
         <div className="w-full max-w-sm">
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <Recycle className="h-6 w-6 text-[#006948]" />
-            <span className="font-['Geist'] text-lg font-bold text-[#006948]">EPRx Seller Portal</span>
+          <div className="mb-8 lg:hidden">
+            <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain" />
           </div>
 
           <h2 className="font-['Geist'] text-2xl font-semibold text-on-surface mb-1">Seller sign in</h2>
