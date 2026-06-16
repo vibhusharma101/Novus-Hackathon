@@ -1,4 +1,4 @@
-import Image from 'next/image'
+﻿import Image from 'next/image'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
@@ -22,7 +22,7 @@ export default async function SellerOnboardingPage() {
           {/* Brand anchor */}
           <div className="mb-10 text-center">
             <div className="mb-4">
-              <Image src="/logo.png" alt="Recyclink" width={56} height={56} className="h-14 w-14 object-contain mx-auto" />
+              <Image src="/logo.jpg" alt="Recyclink" width={56} height={56} className="h-14 w-14 object-contain mx-auto" />
             </div>
             <h1 className="font-['Geist'] text-2xl font-semibold tracking-tight text-on-surface mb-2">
               Seller Registration

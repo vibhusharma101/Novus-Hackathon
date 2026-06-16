@@ -1,4 +1,4 @@
-import Image from 'next/image'
+﻿import Image from 'next/image'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
@@ -23,13 +23,13 @@ export default async function HomePage() {
   )
 }
 
-/* ── Top Navigation ──────────────────────────────────────── */
+/* â”€â”€ Top Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function TopNav() {
   return (
     <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
       <div className="flex justify-between items-center px-4 md:px-8 h-16 max-w-[1440px] mx-auto">
         <div className="flex items-center gap-8">
-          <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain" />
+          <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain" />
           <div className="hidden md:flex gap-6">
             {[
               { label: 'Marketplace', active: true },
@@ -71,11 +71,11 @@ function TopNav() {
   )
 }
 
-/* ── Hero ────────────────────────────────────────────────── */
+/* â”€â”€ Hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function HeroSection() {
   const cards = [
     {
-      icon: '✓',
+      icon: 'âœ“',
       iconColor: 'text-primary',
       bg: 'bg-primary/5',
       label: '100% Verified',
@@ -83,7 +83,7 @@ function HeroSection() {
       offset: '',
     },
     {
-      icon: '₹',
+      icon: 'â‚¹',
       iconColor: 'text-[--tertiary]',
       bg: 'bg-[--tertiary]/5',
       label: 'Instant Settlement',
@@ -91,7 +91,7 @@ function HeroSection() {
       offset: 'mt-8',
     },
     {
-      icon: '↗',
+      icon: 'â†—',
       iconColor: 'text-secondary',
       bg: 'bg-secondary/5',
       label: 'Market Data',
@@ -99,7 +99,7 @@ function HeroSection() {
       offset: '-mt-4',
     },
     {
-      icon: '◈',
+      icon: 'â—ˆ',
       iconColor: 'text-on-surface',
       bg: 'bg-surface-container',
       label: 'Zero Markup',
@@ -131,7 +131,7 @@ function HeroSection() {
               href="/sign-up?role=buyer"
               className="bg-primary text-on-primary px-8 py-4 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase flex items-center gap-2 hover:opacity-90 transition-opacity"
             >
-              VIEW LIVE ORDER BOOK →
+              VIEW LIVE ORDER BOOK â†’
             </Link>
             <Link
               href="/sign-up?role=seller"
@@ -171,10 +171,10 @@ function HeroSection() {
   )
 }
 
-/* ── Marquee Ticker ─────────────────────────────────────── */
+/* â”€â”€ Marquee Ticker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const TICKER_ITEMS = [
   'Brand in MH offset 3,200 kg of Rigid (Cat I)',
-  'Recycler RJ-04 listed 12,500 kg Cat II @ ₹24.50',
+  'Recycler RJ-04 listed 12,500 kg Cat II @ â‚¹24.50',
   'New Transaction: 450 MT MLP (Cat III) verified in TN',
   'Floor Price Alert: Cat I dropped 2.4% in DL/NCR',
   'Compliance Update: 84% of Q3 liabilities settled via Terminal',
@@ -198,7 +198,7 @@ function MarqueeTicker() {
   )
 }
 
-/* ── Calculator Section ──────────────────────────────────── */
+/* â”€â”€ Calculator Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function CalculatorSection() {
   const categories = [
     { code: 'CAT I', label: 'Rigid', active: true },
@@ -294,7 +294,7 @@ function CalculatorSection() {
             <div className="flex justify-between border-b border-outline-variant pb-4">
               <span className="text-sm">Estimated Market Value</span>
               <span className="font-['JetBrains_Mono'] text-[20px] font-semibold text-primary">
-                ₹1,10,86,250
+                â‚¹1,10,86,250
               </span>
             </div>
 
@@ -339,12 +339,12 @@ function CalculatorSection() {
   )
 }
 
-/* ── Live Order Book ─────────────────────────────────────── */
+/* â”€â”€ Live Order Book â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 const MOCK_ORDERS = [
-  { name: 'GreenTech Solutions', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG', price: '₹22.50' },
-  { name: 'EcoPolymer India', verified: false, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG', price: '₹18.75' },
-  { name: 'Resin Works', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG', price: '₹25.10' },
-  { name: 'Bharat Recyclers', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG', price: '₹21.90' },
+  { name: 'GreenTech Solutions', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG', price: 'â‚¹22.50' },
+  { name: 'EcoPolymer India', verified: false, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG', price: 'â‚¹18.75' },
+  { name: 'Resin Works', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG', price: 'â‚¹25.10' },
+  { name: 'Bharat Recyclers', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG', price: 'â‚¹21.90' },
 ]
 
 function LiveOrderBook() {
@@ -429,25 +429,25 @@ function LiveOrderBook() {
   )
 }
 
-/* ── Fraud Shield ────────────────────────────────────────── */
+/* â”€â”€ Fraud Shield â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function FraudShield() {
   const cards = [
     {
-      icon: '⚖',
+      icon: 'âš–',
       iconBg: 'bg-primary/10',
       iconColor: 'text-primary',
       title: 'Institutional Escrow',
       desc: 'Funds are only released to recyclers once the CPCB portal generates a verified certificate matching the order quantity and category. Your capital is never at risk.',
     },
     {
-      icon: '⇄',
+      icon: 'â‡„',
       iconBg: 'bg-secondary/10',
       iconColor: 'text-secondary',
       title: 'Split-Order Optimization',
       desc: 'Our engine automatically splits large buy orders across multiple verified recyclers to ensure 100% fulfillment at the lowest possible volume-weighted average price.',
     },
     {
-      icon: '✓',
+      icon: 'âœ“',
       iconBg: 'bg-[--tertiary]/10',
       iconColor: 'text-[--tertiary]',
       title: 'Compliance Badges',
@@ -489,7 +489,7 @@ function FraudShield() {
   )
 }
 
-/* ── Footer ──────────────────────────────────────────────── */
+/* â”€â”€ Footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
 function SiteFooter() {
   const footerLinks = {
     TERMINAL: ['Marketplace', 'Order Book', 'Yield Terminal', 'API Access'],
@@ -521,7 +521,7 @@ function SiteFooter() {
         {/* Links grid */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
           <div className="space-y-6">
-            <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain brightness-0 invert" />
+            <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain brightness-0 invert" />
             <p className="text-sm text-surface-variant max-w-[240px] leading-relaxed">
               India's premier institutional terminal for environmental responsibility credit
               management.

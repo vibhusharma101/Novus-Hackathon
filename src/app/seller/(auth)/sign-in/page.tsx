@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import { useState } from 'react'
@@ -36,7 +36,7 @@ export default function SellerSignInPage() {
       <div className="hidden lg:flex flex-col justify-between p-12 bg-[#006948] text-white">
         <div>
           <div className="mb-12">
-            <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain brightness-0 invert" />
+            <Image src="/logo.jpg" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain brightness-0 invert" />
           </div>
           <h1 className="font-['Geist'] text-4xl font-bold leading-tight mb-4">
             Monetise your<br />certified EPR<br />credits.
@@ -68,7 +68,7 @@ export default function SellerSignInPage() {
       <div className="flex flex-col items-center justify-center p-6 min-h-screen lg:min-h-0">
         <div className="w-full max-w-sm">
           <div className="mb-8 lg:hidden">
-            <Image src="/logo.png" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain" />
+            <Image src="/logo.jpg" alt="Recyclink" width={48} height={48} className="h-12 w-12 object-contain" />
           </div>
 
           <h2 className="font-['Geist'] text-2xl font-semibold text-on-surface mb-1">Seller sign in</h2>

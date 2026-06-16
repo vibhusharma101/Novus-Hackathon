@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import Image from 'next/image'
 import Link from 'next/link'
@@ -38,7 +38,7 @@ export function SellerSidebar({ companyName }: { companyName: string }) {
         <div className="w-9 h-9 bg-primary-container rounded-lg flex items-center justify-center">
           <ShieldCheck className="h-5 w-5 text-on-primary" />
         </div>
-        <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
+        <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1">
@@ -82,7 +82,7 @@ export function SellerSidebar({ companyName }: { companyName: string }) {
 export function SellerTopbar({ companyName }: { companyName: string }) {
   return (
     <header className="h-14 lg:h-16 shrink-0 border-b border-[--color-border-zinc] bg-surface-container-lowest flex items-center justify-between px-4 lg:px-8">
-      <Image src="/logo.png" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
+      <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-9 w-9 object-contain" />
       <div className="flex items-center gap-3">
         <Link
           href="/seller/listings/new"
