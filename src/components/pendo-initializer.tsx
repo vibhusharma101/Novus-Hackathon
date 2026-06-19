@@ -44,6 +44,7 @@ export function PendoInitializer() {
           if (metadata.gstin) account.gstin = metadata.gstin
           if (metadata.cpcbRegNo) account.cpcbRegNo = metadata.cpcbRegNo
           if (metadata.state) account.state = metadata.state
+          if ('buyerType' in metadata && metadata.buyerType) account.buyerType = metadata.buyerType
           if (metadata.capacityMt != null) account.capacityMt = metadata.capacityMt
           if (metadata.verified != null) account.verified = metadata.verified
           if (metadata.createdAt) account.createdAt = metadata.createdAt
