@@ -147,6 +147,7 @@ export function OrderBook({
 
   const [listings, setListings] = useState<ListingWithRecycler[]>(initialListings)
   const [catFilter, setCatFilter] = useState<PlasticCategory | 'all'>('all')
+  const [creditFilter, setCreditFilter] = useState<'all' | 'recycling' | 'eol'>('all')
   const [stateFilter, setStateFilter] = useState('all')
   const [sortBy, setSortBy] = useState<'price_asc' | 'price_desc' | 'qty_desc' | 'latest'>('price_asc')
   const [page, setPage] = useState(1)
@@ -239,6 +240,7 @@ export function OrderBook({
   const filtered = useMemo(() => {
     let result = listings
       .filter(l => catFilter === 'all' || l.category === catFilter)
+      .filter(l => creditFilter === 'all' || (l.credit_type ?? 'recycling') === creditFilter)
       .filter(l => stateFilter === 'all' || l.recycler?.state === stateFilter)
 
     switch (sortBy) {
@@ -255,12 +257,13 @@ export function OrderBook({
 
   function clearFilters() {
     setCatFilter('all')
+    setCreditFilter('all')
     setStateFilter('all')
     setSortBy('price_asc')
     setPage(1)
   }
 
-  const hasFilters = catFilter !== 'all' || stateFilter !== 'all' || sortBy !== 'price_asc'
+  const hasFilters = catFilter !== 'all' || creditFilter !== 'all' || stateFilter !== 'all' || sortBy !== 'price_asc'
 
   function handleBuy(listingId: string) {
     router.push(`/dashboard/checkout/${listingId}`)
@@ -286,22 +289,41 @@ export function OrderBook({
       <div className="sticky top-0 z-20 bg-surface-container-lowest border-b border-[--color-border-zinc] px-6 py-2">
         {/* Desktop filter row */}
         <div className="hidden md:flex items-center justify-between gap-4">
-          <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
-            {(['all', 'rigid', 'flexible', 'mlp'] as const).map(cat => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => { setCatFilter(cat); setPage(1) }}
-                className={cn(
-                  'px-4 py-1.5 rounded font-data text-sm transition-colors capitalize',
-                  catFilter === cat
-                    ? 'bg-surface-container-lowest text-primary shadow-sm font-semibold'
-                    : 'text-on-surface-variant hover:bg-surface-container-high'
-                )}
-              >
-                {cat === 'all' ? 'All' : CAT_LABELS[cat].label}
-              </button>
-            ))}
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
+              {(['all', 'rigid', 'flexible', 'mlp'] as const).map(cat => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => { setCatFilter(cat); setPage(1) }}
+                  className={cn(
+                    'px-4 py-1.5 rounded font-data text-sm transition-colors capitalize',
+                    catFilter === cat
+                      ? 'bg-surface-container-lowest text-primary shadow-sm font-semibold'
+                      : 'text-on-surface-variant hover:bg-surface-container-high'
+                  )}
+                >
+                  {cat === 'all' ? 'All' : CAT_LABELS[cat].label}
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
+              {([['all', 'All Credits'], ['recycling', 'Recycling'], ['eol', 'End-of-Life']] as const).map(([type, label]) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => { setCreditFilter(type); setPage(1) }}
+                  className={cn(
+                    'px-3 py-1.5 rounded font-data text-sm transition-colors',
+                    creditFilter === type
+                      ? 'bg-surface-container-lowest text-primary shadow-sm font-semibold'
+                      : 'text-on-surface-variant hover:bg-surface-container-high'
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="flex items-center gap-4">
@@ -360,6 +382,22 @@ export function OrderBook({
             </button>
           ))}
           <div className="h-5 w-px bg-[--color-border-zinc] shrink-0 mx-1" />
+          {([['all', 'All Credits'], ['recycling', 'Recycling'], ['eol', 'EoL']] as const).map(([type, label]) => (
+            <button
+              key={type}
+              type="button"
+              onClick={() => { setCreditFilter(type); setPage(1) }}
+              className={cn(
+                'shrink-0 px-3 py-1.5 rounded-full font-data text-sm transition-colors',
+                creditFilter === type
+                  ? 'bg-primary-container text-on-primary-container font-semibold'
+                  : 'border border-[--color-border-zinc] text-on-surface-variant hover:bg-surface-container-low'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+          <div className="h-5 w-px bg-[--color-border-zinc] shrink-0 mx-1" />
           <button
             type="button"
             onClick={() => setMobileSheetOpen(true)}
@@ -409,6 +447,7 @@ export function OrderBook({
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Recycler Name</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Location</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Type</th>
+                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Credit</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-right">Qty (kg / MT)</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-right">Price / kg</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-center">Action</th>
@@ -452,8 +491,17 @@ export function OrderBook({
                             {CAT_LABELS[listing.category].label}
                           </span>
                         </td>
+                        <td className="px-4 py-3">
+                          <span className={cn('px-2 py-0.5 rounded font-data text-[10px] font-bold border',
+                            (listing.credit_type ?? 'recycling') === 'eol'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-success-emerald-light text-primary border-primary/20'
+                          )}>
+                            {(listing.credit_type ?? 'recycling') === 'eol' ? 'EoL' : 'Recycling'}
+                          </span>
+                        </td>
                         <td className="px-4 py-3 text-right tabular-nums">
-                          <span className="font-data text-sm text-on-surface">{intl.format(Math.round(listing.qty_kg))}</span>
+                          <span className="font-data text-sm text-on-surface">{intl.format(Math.round(listing.qty_kg))} kg</span>
                           <span className="block font-data text-[10px] text-on-surface-variant">{fmtMt(listing.qty_kg)}</span>
                         </td>
                         <td className="px-4 py-3 font-data text-sm text-right font-bold text-primary tabular-nums">

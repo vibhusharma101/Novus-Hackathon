@@ -134,10 +134,10 @@ export function ComplianceDashboard({
         <div className="absolute top-0 left-0 h-full w-1 bg-[--color-risk-red]" />
         <div className="pl-3">
           <h1 className="text-2xl font-['Geist'] font-semibold text-on-surface mb-0.5">
-            Welcome back, {companyName}
+            Welcome, {companyName}
           </h1>
           <p className="text-sm text-on-surface-variant">
-            EPR Compliance Portal · CPCB Verified
+            Step 1: Calculate your liability → Step 2: Offset it on the marketplace
           </p>
         </div>
         <div
@@ -172,43 +172,55 @@ export function ComplianceDashboard({
                 Category Progress
               </h3>
               <div className="space-y-4">
-                {CAT_ORDER.map(cat => {
-                  const liabilityKg = liabilityByCategory[cat] ?? 0
-                  const securedKg = Math.min(creditsByCategory[cat] ?? 0, liabilityKg)
-                  const pct = liabilityKg > 0 ? Math.min(Math.round((securedKg / liabilityKg) * 100), 100) : 0
-                  return (
-                    <div key={cat} className="space-y-1.5">
-                      <div className="flex justify-between font-data text-[11px] uppercase tracking-tight">
-                        <span className="text-on-surface-variant">{CAT_LABELS[cat]}</span>
-                        <span className="text-on-surface">
-                          {intl.format(Math.round(securedKg))} / {intl.format(Math.round(liabilityKg))} kg
-                        </span>
-                      </div>
-                      <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full transition-all duration-1000"
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-                {liabilities.length === 0 && (
-                  <p className="text-xs text-on-surface-variant italic text-center py-2">
-                    Complete the calculator to see your liability breakdown.
+                {liabilities.length === 0 ? (
+                  <p className="text-xs text-on-surface-variant italic text-center py-4">
+                    Run the calculator first to see your category breakdown.
                   </p>
+                ) : (
+                  CAT_ORDER.map(cat => {
+                    const liabilityKg = liabilityByCategory[cat] ?? 0
+                    const securedKg = Math.min(creditsByCategory[cat] ?? 0, liabilityKg)
+                    const pct = liabilityKg > 0 ? Math.min(Math.round((securedKg / liabilityKg) * 100), 100) : 0
+                    return (
+                      <div key={cat} className="space-y-1.5">
+                        <div className="flex justify-between font-data text-[11px] uppercase tracking-tight">
+                          <span className="text-on-surface-variant">{CAT_LABELS[cat]}</span>
+                          <span className="text-on-surface">
+                            {(securedKg / 1000).toFixed(2)} / {(liabilityKg / 1000).toFixed(2)} MT
+                          </span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all duration-1000"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })
                 )}
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => router.push('/dashboard/exchange')}
-              className="w-full py-3 bg-primary text-on-primary rounded-lg font-data text-sm font-bold hover:bg-primary-container transition-colors uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98]"
-            >
-              Open Marketplace
-              <ArrowRight className="h-4 w-4" />
-            </button>
+            {liabilities.length === 0 ? (
+              <button
+                type="button"
+                onClick={() => router.push('/dashboard/calculator')}
+                className="w-full py-3 bg-primary text-on-primary rounded-lg font-data text-sm font-bold hover:bg-primary-container transition-colors uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98]"
+              >
+                Calculate my liability
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => router.push('/dashboard/exchange')}
+                className="w-full py-3 bg-primary text-on-primary rounded-lg font-data text-sm font-bold hover:bg-primary-container transition-colors uppercase tracking-wider flex items-center justify-center gap-2 active:scale-[0.98]"
+              >
+                Open EPR Exchange
+                <ArrowRight className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -263,7 +275,7 @@ export function ComplianceDashboard({
                 )}
               </div>
               <p className="text-xs text-outline leading-relaxed">
-                Non-compliance by deadline may result in penalties of ₹15,00,000+ as per CPCB guidelines.
+                Non-compliance by deadline may result in penalties of up to ₹15,00,000 as per CPCB guidelines.
               </p>
             </div>
           </div>
@@ -280,7 +292,7 @@ export function ComplianceDashboard({
       <div className="bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg overflow-hidden">
         <div className="px-6 py-4 border-b border-[--color-border-zinc] bg-slate-50 flex justify-between items-center">
           <h3 className="font-['Geist'] text-[18px] font-semibold text-on-surface">Recent Transactions</h3>
-          <span className="font-data text-[11px] text-outline uppercase tracking-wide">Fiscal Year 2024–25</span>
+          <span className="font-data text-[11px] text-outline uppercase tracking-wide">Fiscal Year 2025–26</span>
         </div>
 
         {recentOrders.length === 0 ? (
@@ -300,7 +312,7 @@ export function ComplianceDashboard({
               onClick={() => router.push('/dashboard/exchange')}
               className="px-6 py-2 border border-primary text-primary hover:bg-success-emerald-light rounded-lg font-data text-sm font-bold transition-all active:scale-[0.98]"
             >
-              Visit Marketplace
+              Open EPR Exchange
             </button>
           </div>
         ) : (

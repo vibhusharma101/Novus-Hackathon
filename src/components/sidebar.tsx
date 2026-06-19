@@ -10,7 +10,7 @@ import { LayoutDashboard, Calculator, ArrowLeftRight } from 'lucide-react'
 const navItems = [
   { href: '/dashboard',            label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/calculator', label: 'Calculator', icon: Calculator,      exact: false },
-  { href: '/dashboard/exchange',   label: 'Exchange',   icon: ArrowLeftRight,  exact: false },
+  { href: '/dashboard/exchange',   label: 'EPR Exchange', icon: ArrowLeftRight,  exact: false },
 ]
 
 export function Sidebar() {

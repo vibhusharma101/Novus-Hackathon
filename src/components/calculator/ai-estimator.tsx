@@ -6,8 +6,13 @@ import { cn } from '@/lib/utils'
 import type { PlasticCategory } from '@/lib/epr/constants'
 
 const EXAMPLES = [
-  'We sell ~50,000 units/year of shampoo in 200ml rigid PET bottles, plus refill sachets in flexible film.',
-  'A snack brand shipping 2 million chip packets a year in multi-layered foil packaging.',
+  'D2C snack brand (50K units/yr): 50,000 units of chips in rigid PP trays with flexible film sachets for dipping sauce.',
+  'Electronics retailer (2M chip packets): 2 million semiconductor packaging units in multi-layered anti-static foil.',
+]
+
+const EXAMPLE_LABELS = [
+  'D2C snack brand (50K units/yr)',
+  'Electronics retailer (2M chip packets)',
 ]
 
 type EstimateResponse = {
@@ -26,6 +31,7 @@ export function AiEstimator({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [applied, setApplied] = useState<string | null>(null)
+  const [result, setResult] = useState<EstimateResponse | null>(null)
 
   async function run() {
     const text = desc.trim()
@@ -41,6 +47,7 @@ export function AiEstimator({
       })
       if (!res.ok) throw new Error('failed')
       const data = (await res.json()) as EstimateResponse
+      setResult(data)
       onEstimate({ rigid: data.rigid_kg, flexible: data.flexible_kg, mlp: data.mlp_kg })
       setApplied(data.rationale)
       if (typeof pendo !== 'undefined') {
@@ -92,9 +99,9 @@ export function AiEstimator({
               key={i}
               type="button"
               onClick={() => setDesc(ex)}
-              className="text-[11px] text-on-surface-variant border border-[--color-border-zinc] rounded-full px-2.5 py-1 hover:border-secondary hover:text-secondary transition-colors"
+              className="text-[11px] text-on-surface-variant border border-[--color-border-zinc] rounded-full px-2.5 py-1 hover:border-primary hover:text-primary transition-colors"
             >
-              Example {i + 1}
+              {EXAMPLE_LABELS[i]}
             </button>
           ))}
         </div>
@@ -106,28 +113,45 @@ export function AiEstimator({
           </div>
         )}
 
-        {applied && (
-          <div className="mt-3 flex items-start gap-2 rounded-md bg-success-emerald-light/40 border border-primary/20 px-3 py-2 text-[13px] text-on-surface">
-            <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-            <span><span className="font-semibold text-primary">Pre-filled below.</span> {applied}</span>
+        {applied && result && (
+          <div className="mt-3 rounded-md bg-success-emerald-light/40 border border-primary/20 px-3 py-2 text-[13px] text-on-surface">
+            <div className="flex items-start gap-2 mb-2">
+              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <span><span className="font-semibold text-primary">Pre-filling Step 2.</span> {applied}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 mt-2 pt-2 border-t border-primary/10 text-center">
+              {[['Rigid', result.rigid_kg], ['Flexible', result.flexible_kg], ['MLP', result.mlp_kg]].map(([label, kg]) => (
+                <div key={label as string}>
+                  <p className="font-data text-[11px] text-on-surface-variant uppercase tracking-wide">{label as string}</p>
+                  <p className="font-data text-sm font-semibold text-primary">
+                    {(kg as number) > 0 ? `${new Intl.NumberFormat('en-IN').format(Math.round(kg as number))} kg` : '—'}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 
-        <button
-          type="button"
-          onClick={run}
-          disabled={loading || desc.trim().length < 3}
-          className={cn(
-            'mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-md font-data text-sm font-semibold transition-all active:scale-[0.98]',
-            'bg-secondary text-on-secondary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed',
-          )}
-        >
-          {loading ? (
-            <><Loader2 className="h-4 w-4 animate-spin" /> Estimating…</>
-          ) : (
-            <>Estimate &amp; pre-fill <ArrowRight className="h-4 w-4" /></>
-          )}
-        </button>
+        <div className="flex items-center justify-between mt-4 gap-4">
+          <button
+            type="button"
+            onClick={run}
+            disabled={loading || desc.trim().length < 3}
+            className={cn(
+              'inline-flex items-center gap-2 px-4 py-2 rounded-md font-data text-sm font-semibold transition-all active:scale-[0.98]',
+              'bg-primary text-on-primary hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed',
+            )}
+          >
+            {loading ? (
+              <><Loader2 className="h-4 w-4 animate-spin" /> Estimating…</>
+            ) : (
+              <>Estimate &amp; pre-fill <ArrowRight className="h-4 w-4" /></>
+            )}
+          </button>
+          <p className="text-[11px] text-on-surface-variant italic">
+            AI estimates are approximate — verify with your actual procurement records.
+          </p>
+        </div>
       </div>
     </div>
   )
