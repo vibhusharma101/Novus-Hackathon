@@ -140,6 +140,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
         if (typeof pendo !== 'undefined') {
           pendo.track('listing_published', {
             category: category,
+            credit_type: creditType,
             qty_kg: qtyKg,
             qty_mt: parseFloat(qtyMt),
             price_per_kg: priceNum,
