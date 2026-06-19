@@ -26,7 +26,7 @@ const intl = new Intl.NumberFormat('en-IN')
 const fmtKg = (n: number) => `${intl.format(Math.round(n))}`
 const fmtMT = (kg: number) => (kg / 1000).toFixed(2)
 const fmtRs = (n: number) => `₹${intl.format(Math.round(n))}`
-const fmtRate = (n: number) => `₹${n.toFixed(2)}`
+const fmtRate = (n: number) => `₹${Math.round(n)}`
 
 const CAT_ORDER: PlasticCategory[] = ['rigid', 'flexible', 'mlp']
 const CAT_META: Record<PlasticCategory, { label: string; icon: typeof Boxes; tint: string }> = {
@@ -206,11 +206,14 @@ export function SellerVault({
                     <div className="flex justify-between items-start gap-2">
                       <div className="min-w-0">
                         <p className="font-data text-sm font-medium text-on-surface truncate">
-                          {order.buyer_company_name ?? 'Verified Buyer'}
+                          {order.buyer_company_name ?? 'Brand Owner'}
                         </p>
                         <p className="font-data text-[10px] text-outline uppercase truncate">
                           GSTIN: {order.buyer_gstin ?? '—'}
                         </p>
+                        <span className="inline-block mt-0.5 font-data text-[9px] px-1.5 py-0.5 rounded bg-secondary/10 text-secondary border border-secondary/20 uppercase tracking-wider">
+                          Brand Owner
+                        </span>
                       </div>
                       <div className="text-right shrink-0">
                         <p className="font-data text-base font-semibold text-primary">{fmtRs(order.total)}</p>
@@ -279,6 +282,7 @@ export function SellerVault({
                     <tr>
                       <th className="px-5 py-3 font-data text-[10px] text-outline uppercase tracking-wider">Listing ID</th>
                       <th className="px-5 py-3 font-data text-[10px] text-outline uppercase tracking-wider">Category</th>
+                      <th className="px-5 py-3 font-data text-[10px] text-outline uppercase tracking-wider">Sub-Category</th>
                       <th className="px-5 py-3 font-data text-[10px] text-outline uppercase tracking-wider text-right">Qty (MT)</th>
                       <th className="px-5 py-3 font-data text-[10px] text-outline uppercase tracking-wider text-right">Price / kg</th>
                       <th className="px-5 py-3 font-data text-[10px] text-outline uppercase tracking-wider">Status</th>
@@ -292,6 +296,15 @@ export function SellerVault({
                         <tr key={l.id} className={cn('hover:bg-surface-container-low/40 transition-colors', muted && 'opacity-60')}>
                           <td className="px-5 py-4 font-data text-sm">#{l.id.slice(0, 8).toUpperCase()}</td>
                           <td className="px-5 py-4 text-sm">{CAT_META[l.category].label}</td>
+                          <td className="px-5 py-4">
+                            <span className={cn('px-2 py-0.5 rounded text-[10px] font-bold uppercase border',
+                              l.credit_type === 'eol'
+                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : 'bg-success-emerald-light text-primary border-primary/20'
+                            )}>
+                              {l.credit_type === 'eol' ? 'End-of-Life' : 'Recycling'}
+                            </span>
+                          </td>
                           <td className="px-5 py-4 font-data text-sm text-right tabular-nums">{fmtMT(l.qty_kg)}</td>
                           <td className="px-5 py-4 font-data text-sm text-right tabular-nums">{fmtRate(l.price_per_kg)}</td>
                           <td className="px-5 py-4">
@@ -314,7 +327,17 @@ export function SellerVault({
                     <div key={l.id} className={cn('p-4 space-y-3', l.status === 'sold' && 'opacity-60')}>
                       <div className="flex justify-between items-center">
                         <div>
-                          <h4 className="text-sm font-bold text-on-surface">{CAT_META[l.category].label}</h4>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-bold text-on-surface">{CAT_META[l.category].label}</h4>
+                            <span className={cn(
+                              'px-1.5 py-0.5 rounded text-[9px] font-bold uppercase border',
+                              l.credit_type === 'eol'
+                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : 'bg-success-emerald-light text-primary border-primary/20'
+                            )}>
+                              {l.credit_type === 'eol' ? 'EoL' : 'Recycling'}
+                            </span>
+                          </div>
                           <p className="font-data text-[10px] text-outline uppercase">#{l.id.slice(0, 8).toUpperCase()}</p>
                         </div>
                         <span className={cn('px-2 py-0.5 rounded-full text-[10px] font-bold uppercase', badge.cls)}>

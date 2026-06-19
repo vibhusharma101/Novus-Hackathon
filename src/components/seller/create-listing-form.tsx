@@ -18,7 +18,7 @@ import type { MarketStat } from '@/app/seller/(portal)/listings/new/page'
 
 const intl = new Intl.NumberFormat('en-IN')
 const fmtRs = (n: number) => `₹${intl.format(Math.round(n))}`
-const fmtRate = (n: number) => `₹${n.toFixed(2)}`
+const fmtRate = (n: number) => `₹${Math.round(n)}`
 
 const CATS: { id: PlasticCategory; label: string; cat: string; icon: typeof Boxes; desc: string }[] = [
   { id: 'rigid',    label: 'Rigid Plastic',    cat: 'Category I',   icon: Boxes,   desc: 'HDPE, PP, and other rigid plastic packaging.' },
@@ -40,6 +40,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
   const [isPending, startTransition] = useTransition()
 
   const [category, setCategory] = useState<PlasticCategory>('rigid')
+  const [creditType, setCreditType] = useState<'recycling' | 'eol'>('recycling')
   const [qtyMt, setQtyMt] = useState('')
   const [price, setPrice] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -60,7 +61,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
       })
       if (!res.ok) throw new Error('failed')
       const data = (await res.json()) as { suggested_price_per_kg: number; sell_speed: 'fast' | 'moderate' | 'slow'; reasoning: string }
-      setPrice(String(data.suggested_price_per_kg))
+      setPrice(String(Math.round(data.suggested_price_per_kg)))
       setAiTip({ reasoning: data.reasoning, sell_speed: data.sell_speed })
       if (typeof pendo !== 'undefined') {
         pendo.track('ai_price_suggested', {
@@ -134,7 +135,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
       return
     }
     startTransition(async () => {
-      const result = await createListing({ category, qty_kg: qtyKg, price_per_kg: priceNum })
+      const result = await createListing({ category, qty_kg: qtyKg, price_per_kg: priceNum, credit_type: creditType })
       if (result.ok) {
         if (typeof pendo !== 'undefined') {
           pendo.track('listing_published', {
@@ -208,6 +209,34 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
                 )
               })}
             </div>
+
+            {/* Credit type sub-selection */}
+            <div className="mt-4 pt-4 border-t border-[--color-border-zinc]">
+              <p className="font-data text-[11px] text-on-surface-variant uppercase tracking-wide mb-3">Credit Type</p>
+              <div className="flex gap-3">
+                {([['recycling', 'Recycling Credits'], ['eol', 'End-of-Life Credits']] as const).map(([type, label]) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setCreditType(type)}
+                    className={cn(
+                      'flex-1 py-2.5 px-4 rounded-lg border font-data text-sm font-semibold transition-all',
+                      creditType === type
+                        ? 'border-primary bg-primary-container/5 text-primary ring-1 ring-primary'
+                        : 'border-[--color-border-zinc] text-on-surface-variant hover:border-primary',
+                    )}
+                  >
+                    {label}
+                    {type === 'recycling' && (
+                      <span className="ml-2 font-data text-[10px] text-primary bg-primary-container/10 px-1.5 py-0.5 rounded">Higher value</span>
+                    )}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[11px] text-on-surface-variant mt-2">
+                Recycling credits command a premium — material stays in the circular economy loop.
+              </p>
+            </div>
           </div>
 
           {/* Volume & Pricing */}
@@ -224,10 +253,10 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
                   <input
                     id="qty"
                     type="number"
-                    inputMode="decimal"
-                    step="0.01"
-                    min="0"
-                    placeholder="0.00"
+                    inputMode="numeric"
+                    step="1"
+                    min="1"
+                    placeholder="0"
                     value={qtyMt}
                     onChange={e => setQtyMt(e.target.value)}
                     className="w-full bg-surface-container-low border border-[--color-border-zinc] rounded py-3 px-4 font-data text-base focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all tabular-nums"
@@ -245,10 +274,10 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
                   <input
                     id="price"
                     type="number"
-                    inputMode="decimal"
-                    step="0.01"
-                    min="0"
-                    placeholder={stat.avg.toFixed(2)}
+                    inputMode="numeric"
+                    step="1"
+                    min="1"
+                    placeholder={String(Math.round(stat.avg))}
                     value={price}
                     onChange={e => setPrice(e.target.value)}
                     className="w-full bg-surface-container-low border border-[--color-border-zinc] rounded py-3 px-4 font-data text-base focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all tabular-nums"

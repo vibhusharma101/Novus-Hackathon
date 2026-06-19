@@ -62,6 +62,7 @@ export async function createListing(input: ListingInput): Promise<CreateListingR
       category:     parsed.data.category,
       qty_kg:       parsed.data.qty_kg,
       price_per_kg: parsed.data.price_per_kg,
+      credit_type:  parsed.data.credit_type ?? 'recycling',
       status:       'active',
     })
     .select('id')

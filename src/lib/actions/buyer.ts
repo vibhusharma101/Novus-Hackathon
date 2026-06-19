@@ -68,13 +68,13 @@ export async function saveLiabilities(
     }
   }
 
-  const supabase = await createUserClient()
-
-  // RLS returns only this user's brand
-  const { data: brand, error: brandError } = await supabase
+  // Use admin client with explicit filter — Clerk JWT isn't configured in Supabase JWKS
+  // so auth.uid() returns null under RLS, making the user-scoped query return no rows.
+  const { data: brand, error: brandError } = await supabaseAdmin
     .from('brands')
     .select('id')
-    .single()
+    .eq('clerk_user_id', userId)
+    .maybeSingle()
 
   if (brandError || !brand) {
     return { ok: false, error: 'Brand profile not found. Please complete onboarding first.' }
@@ -88,7 +88,7 @@ export async function saveLiabilities(
     liability_kg: calculateLiability(item.category, item.market_kg),
   }))
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('liabilities')
     .upsert(rows, { onConflict: 'brand_id,category' })
 
@@ -120,14 +120,12 @@ export async function placeOrder(input: {
     return { ok: false, error: 'Quantity must be greater than 0.' }
   }
 
-  const supabase = await createUserClient().catch(() => null)
-  if (!supabase) return { ok: false, error: 'Session expired. Please refresh the page and try again.' }
-
-  // Derive buyer_id from RLS-scoped query — never from client input
-  const { data: brand } = await supabase
+  // Use admin client with explicit filter — Clerk JWT not configured in Supabase JWKS
+  const { data: brand } = await supabaseAdmin
     .from('brands')
     .select('id, gstin, company_name')
-    .single()
+    .eq('clerk_user_id', userId)
+    .maybeSingle()
 
   if (!brand) return { ok: false, error: 'Brand profile not found. Please complete onboarding first.' }
 
@@ -150,8 +148,7 @@ export async function placeOrder(input: {
   const total        = parseFloat((credits_cost + platform_fee).toFixed(2))
   const expires_at   = new Date(Date.now() + ORDER_EXPIRY_HOURS * 60 * 60 * 1000).toISOString()
 
-  // Insert under RLS — policy checks buyer_id belongs to the authenticated user
-  const { data: order, error } = await supabase
+  const { data: order, error } = await supabaseAdmin
     .from('orders')
     .insert({
       buyer_id:     brand.id,

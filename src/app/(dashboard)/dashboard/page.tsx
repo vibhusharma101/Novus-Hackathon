@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
-import { createUserClient } from '@/lib/supabase'
+import { createUserClient, supabaseAdmin } from '@/lib/supabase'
 import { ComplianceDashboard } from '@/components/dashboard/compliance-overview'
 import type { PlasticCategory } from '@/lib/epr/constants'
 
@@ -17,7 +17,7 @@ export default async function DashboardPage() {
   const supabase = await createUserClient()
 
   const [{ data: brand }, { data: liabilities }, { data: transferredOrders }, { data: recentOrders }] = await Promise.all([
-    supabase.from('brands').select('company_name').maybeSingle(),
+    supabaseAdmin.from('brands').select('company_name').eq('clerk_user_id', userId).maybeSingle(),
     supabase.from('liabilities').select('category, liability_kg'),
     supabase.from('orders').select('qty_kg, category').eq('status', 'transferred'),
     supabase

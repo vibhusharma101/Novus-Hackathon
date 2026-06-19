@@ -63,7 +63,7 @@ function TopNav() {
             href="/sign-up"
             className="text-sm px-6 py-2 bg-primary text-on-primary font-bold hover:opacity-90 transition-opacity"
           >
-            Start Trading
+            Go to Marketplace
           </Link>
         </div>
       </div>
@@ -341,10 +341,10 @@ function CalculatorSection() {
 
 /* ── Live Order Book ─────────────────────────────────────── */
 const MOCK_ORDERS = [
-  { name: 'GreenTech Solutions', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG', price: '₹22.50' },
-  { name: 'EcoPolymer India', verified: false, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG', price: '₹18.75' },
-  { name: 'Resin Works', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG', price: '₹25.10' },
-  { name: 'Bharat Recyclers', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG', price: '₹21.90' },
+  { name: 'PepsiCo India', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG (245 MT)', price: '₹7' },
+  { name: 'HUL', verified: true, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG (1,200 MT)', price: '₹6' },
+  { name: 'LG Electronics', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG (42.5 MT)', price: '₹7' },
+  { name: 'Nestle India', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG (880 MT)', price: '₹6' },
 ]
 
 function LiveOrderBook() {

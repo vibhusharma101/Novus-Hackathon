@@ -97,6 +97,14 @@ create table if not exists orders (
 alter table orders add column if not exists buyer_gstin        text;
 alter table orders add column if not exists buyer_company_name text;
 
+-- Backfill: credit_type on listings (recycling vs end-of-life credits).
+alter table listings add column if not exists credit_type text not null default 'recycling'
+  check (credit_type in ('recycling', 'eol'));
+
+-- Backfill: buyer_type on brands (brand_owner / importer / producer).
+alter table brands add column if not exists buyer_type text not null default 'brand_owner'
+  check (buyer_type in ('brand_owner', 'importer', 'producer'));
+
 -- Seller credentials (email + bcrypt hash) — Clerk-free auth for recyclers
 create table if not exists seller_credentials (
   id              uuid primary key default gen_random_uuid(),
