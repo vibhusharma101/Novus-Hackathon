@@ -18,7 +18,7 @@ export async function getPendoMetadata() {
   const [{ data: brand }, { data: recycler }] = await Promise.all([
     supabase
       .from('brands')
-      .select('id, company_name, gstin, state, created_at')
+      .select('id, company_name, gstin, state, buyer_type, created_at')
       .maybeSingle(),
     supabase
       .from('recyclers')
@@ -34,6 +34,7 @@ export async function getPendoMetadata() {
       gstin: brand.gstin,
       cpcbRegNo: null as string | null,
       state: brand.state,
+      buyerType: brand.buyer_type as string | null,
       capacityMt: null as number | null,
       verified: null as boolean | null,
       createdAt: brand.created_at,
