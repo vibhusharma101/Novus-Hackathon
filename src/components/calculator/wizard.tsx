@@ -28,7 +28,7 @@ const CATEGORIES = [
     Icon: Package2,
     targetPct: 30,
     description:
-      'Compliance for rigid plastic packaging including bottles, containers, and rigid films as per PWM Rules 2016 and subsequent amendments.',
+      'Compliance for rigid plastic packaging including bottles, containers, and plastic boxes as per PWM Rules 2016 and subsequent amendments.',
     liquidity: 'HIGH' as const,
     volatilityIndex: '0.14',
   },
@@ -213,13 +213,13 @@ function Step1({ selected, onToggle, onEstimate, onNext, onCancel, clock }: Step
                   </span>
                   <span
                     className={cn(
-                      'font-data text-[11px] px-2 py-0.5 rounded border font-semibold',
+                      'font-data text-[10px] px-2 py-0.5 rounded border font-semibold',
                       isSelected
                         ? 'bg-primary text-on-primary border-primary'
                         : 'bg-surface-container text-on-surface-variant border-[--color-border-zinc]',
                     )}
                   >
-                    {targetPct}%
+                    {targetPct}% CPCB Target
                   </span>
                 </div>
               </div>
@@ -230,24 +230,12 @@ function Step1({ selected, onToggle, onEstimate, onNext, onCancel, clock }: Step
 
               {/* Stats */}
               <div className="mt-auto pt-4 border-t border-[--color-border-zinc]/60">
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="flex items-center gap-1.5">
                   <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                   <span className="font-data text-[11px] text-on-surface font-semibold tracking-wider">
                     CPCB VERIFIED SCOPE
                   </span>
                 </div>
-                <ul className="space-y-1">
-                  <li className="flex items-center justify-between">
-                    <span className="text-xs text-on-surface-variant">Market Liquidity</span>
-                    <span className={cn('font-data text-[11px] font-semibold', LIQUIDITY_COLOR[liquidity])}>
-                      {liquidity}
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between">
-                    <span className="text-xs text-on-surface-variant">Volatility Index</span>
-                    <span className="font-data text-[11px] text-secondary">{volatilityIndex}</span>
-                  </li>
-                </ul>
               </div>
 
               {/* Selection indicator */}
@@ -431,7 +419,7 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
                 <Package2 className="h-4 w-4 text-primary" />
                 <h3 className="text-[15px] font-['Geist'] font-semibold text-on-surface">Weight Tonnage Breakdown</h3>
               </div>
-              <span className="font-data text-[11px] text-on-surface-variant">FY 2024–25</span>
+              <span className="font-data text-[11px] text-on-surface-variant">FY 2025–26</span>
             </div>
 
             <table className="w-full border-collapse">
@@ -444,10 +432,7 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
                     HS Code
                   </th>
                   <th className="px-6 py-3 text-right font-data text-[11px] text-on-surface-variant uppercase tracking-wider">
-                    Market Volume (kg)
-                  </th>
-                  <th className="px-6 py-3 text-right font-data text-[11px] text-on-surface-variant uppercase tracking-wider">
-                    EPR Target
+                    Annual Packaging Volume (kg)
                   </th>
                 </tr>
               </thead>
@@ -472,9 +457,6 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
                         className="w-36 font-data text-sm text-right border border-[--color-border-zinc] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white transition-all"
                       />
                     </td>
-                    <td className="px-6 py-4 text-right font-data text-sm text-primary font-semibold">
-                      {cat.targetPct}%
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -484,7 +466,7 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
             <div className="px-6 py-3 bg-primary/5 border-t border-[--color-border-zinc] flex items-start gap-2">
               <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <p className="text-xs text-on-surface-variant">
-                Rule of thumb: ₹1 Cr FMCG revenue ≈ 800–1,200 kg of plastic packaging.
+                Rule of thumb: ₹1 Cr FMCG revenue ≈ 0.8–1.2 metric tonnes of plastic packaging.
                 All values are subject to CPCB audit verification.
               </p>
             </div>
@@ -576,7 +558,7 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
               <div>
                 <span className="font-data text-[11px] font-bold text-primary block">CPCB VERIFIED</span>
                 <span className="text-[11px] text-on-surface-variant leading-tight">
-                  Formula compliant with PWM Rules 2022 amendments.
+                  Formula compliant with PWM Rules 2016 amendments.
                 </span>
               </div>
             </div>
@@ -670,7 +652,7 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
           <div className="flex gap-3">
             <Info className="h-4 w-4 text-primary shrink-0 mt-0.5" />
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Rule of thumb: ₹1 Cr FMCG revenue ≈ 800–1,200 kg of plastic packaging.
+              Rule of thumb: ₹1 Cr FMCG revenue ≈ 0.8–1.2 metric tonnes of plastic packaging.
               Values must align with CPCB portal submissions for the current financial year.
             </p>
           </div>
@@ -858,7 +840,7 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
         </div>
         <div className="bg-surface-container-lowest border border-[--color-border-zinc] rounded-lg p-4">
           <p className="font-data text-[11px] text-on-surface-variant uppercase tracking-wide mb-1">Period</p>
-          <p className="text-sm font-semibold text-on-surface">FY 2024–25</p>
+          <p className="text-sm font-semibold text-on-surface">FY 2025–26</p>
         </div>
       </div>
 
@@ -967,7 +949,7 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
 
       {/* Mobile disclaimer */}
       <p className="md:hidden text-[11px] text-on-surface-variant leading-relaxed mb-4 italic">
-        Calculations are based on CPCB PWM Rules 2022. Market prices are indicative and subject to exchange
+        Calculations are based on CPCB PWM Rules 2016. Market prices are indicative and subject to exchange
         liquidity at the time of purchase.
       </p>
 
@@ -1054,8 +1036,8 @@ export function CalculatorWizard() {
     setWeights(prev => ({ ...prev, [cat]: val }))
   }
 
-  // Applies an AI estimate: selects every category with a positive estimate and
-  // pre-fills its market-kg weight. Categories estimated at 0 are left unselected.
+  // Applies an AI estimate: selects every category with a positive estimate,
+  // pre-fills its market-kg weight, and advances to Step 2.
   function applyEstimate(est: Record<PlasticCategory, number>) {
     const next = new Set<PlasticCategory>()
     const nextWeights: Record<PlasticCategory, string> = { rigid: '', flexible: '', mlp: '' }
@@ -1067,6 +1049,7 @@ export function CalculatorWizard() {
     }
     setSelected(next)
     setWeights(nextWeights)
+    if (next.size > 0) setStep(2)
   }
 
   if (step === 1) {

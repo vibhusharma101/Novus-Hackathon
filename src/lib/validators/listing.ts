@@ -17,6 +17,7 @@ export const listingSchema = z.object({
     .number()
     .positive('Enter a price greater than 0')
     .max(LISTING_MAX_PRICE, 'Price is unrealistically high'),
+  credit_type: z.enum(['recycling', 'eol']).default('recycling'),
 })
 
 export type ListingInput = z.infer<typeof listingSchema>

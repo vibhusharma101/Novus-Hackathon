@@ -1,3 +1,4 @@
+﻿import Image from 'next/image'
 import Link from 'next/link'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
@@ -28,9 +29,7 @@ function TopNav() {
     <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
       <div className="flex justify-between items-center px-4 md:px-8 h-16 max-w-[1440px] mx-auto">
         <div className="flex items-center gap-8">
-          <span className="font-['JetBrains_Mono'] text-[32px] font-bold leading-10 tracking-tight text-primary">
-            EPR Exchange
-          </span>
+          <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-10 w-10 object-contain" />
           <div className="hidden md:flex gap-6">
             {[
               { label: 'Marketplace', active: true },
@@ -64,7 +63,7 @@ function TopNav() {
             href="/sign-up"
             className="text-sm px-6 py-2 bg-primary text-on-primary font-bold hover:opacity-90 transition-opacity"
           >
-            Start Trading
+            Go to Marketplace
           </Link>
         </div>
       </div>
@@ -342,10 +341,10 @@ function CalculatorSection() {
 
 /* ── Live Order Book ─────────────────────────────────────── */
 const MOCK_ORDERS = [
-  { name: 'GreenTech Solutions', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG', price: '₹22.50' },
-  { name: 'EcoPolymer India', verified: false, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG', price: '₹18.75' },
-  { name: 'Resin Works', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG', price: '₹25.10' },
-  { name: 'Bharat Recyclers', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG', price: '₹21.90' },
+  { name: 'PepsiCo India', verified: true, state: 'Maharashtra', type: 'Category I (Rigid)', qty: '245,000 KG (245 MT)', price: '₹7' },
+  { name: 'HUL', verified: true, state: 'Gujarat', type: 'Category III (MLP)', qty: '1,200,000 KG (1,200 MT)', price: '₹6' },
+  { name: 'LG Electronics', verified: true, state: 'Tamil Nadu', type: 'Category II (Flex)', qty: '42,500 KG (42.5 MT)', price: '₹7' },
+  { name: 'Nestle India', verified: false, state: 'Haryana', type: 'Category I (Rigid)', qty: '880,000 KG (880 MT)', price: '₹6' },
 ]
 
 function LiveOrderBook() {
@@ -492,79 +491,46 @@ function FraudShield() {
 
 /* ── Footer ──────────────────────────────────────────────── */
 function SiteFooter() {
-  const footerLinks = {
-    TERMINAL: ['Marketplace', 'Order Book', 'Yield Terminal', 'API Access'],
-    COMPLIANCE: ['Fraud Shield', 'Framework Doc', 'CPCB Connect', 'KYC Verification'],
-    LEGAL: ['Terms of Service', 'Privacy Policy', 'Escrow Terms', 'Audit Rights'],
-  }
-
   return (
-    <footer className="bg-inverse-surface text-surface py-12 md:py-20 px-4 md:px-8 border-t border-outline">
+    <footer className="bg-inverse-surface text-surface py-12 md:py-16 px-4 md:px-8 border-t border-outline">
       <div className="max-w-[1440px] mx-auto">
-        {/* CTA Banner */}
-        <div className="bg-primary/10 border border-primary/20 p-6 md:p-12 flex flex-col md:flex-row justify-between items-center mb-12 md:mb-20 gap-6 md:gap-8">
-          <div>
-            <h2 className="font-['Geist'] text-[32px] font-semibold leading-10 text-primary mb-2">
-              Stop paying broker margins.
-            </h2>
-            <p className="text-base text-surface-variant">
-              Join 1,200+ brands trading directly on EPRx.
-            </p>
-          </div>
-          <Link
-            href="/sign-up"
-            className="bg-primary text-on-primary px-10 py-5 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase hover:opacity-90 transition-opacity whitespace-nowrap"
-          >
-            OPEN A TRADING ACCOUNT
-          </Link>
-        </div>
 
-        {/* Links grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-16">
-          <div className="space-y-6">
-            <div className="font-['JetBrains_Mono'] text-[20px] font-semibold text-inverse-primary">
-              EPR Exchange
+        {/* Logo + tagline + CTA buttons */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10 mb-12">
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl p-1.5 inline-flex">
+              <Image src="/logo.jpg" alt="Recyclink" width={40} height={40} className="h-8 w-8 object-contain" />
             </div>
-            <p className="text-sm text-surface-variant max-w-[240px] leading-relaxed">
-              India's premier institutional terminal for environmental responsibility credit
-              management.
+            <p className="text-sm text-surface-variant max-w-[260px] leading-relaxed">
+              India's zero-markup EPR credit exchange. Direct access for brands and recyclers.
             </p>
           </div>
-          {Object.entries(footerLinks).map(([section, links]) => (
-            <div key={section}>
-              <h4 className="font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] text-inverse-primary uppercase mb-6">
-                {section}
-              </h4>
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link}>
-                    <Link
-                      href="/sign-in"
-                      className="font-['JetBrains_Mono'] text-[13px] text-surface-variant hover:text-inverse-primary transition-colors"
-                    >
-                      {link}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href="/sign-in"
+              className="bg-primary text-on-primary px-6 py-3 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase hover:opacity-90 transition-opacity text-center"
+            >
+              Sign in as Buyer
+            </Link>
+            <Link
+              href="/seller/sign-in"
+              className="border border-white text-white px-6 py-3 font-['JetBrains_Mono'] text-[11px] font-bold tracking-[0.05em] uppercase hover:bg-white/10 transition-colors text-center"
+            >
+              Sign in as Seller
+            </Link>
+          </div>
         </div>
 
         {/* Bottom bar */}
         <div className="border-t border-outline/50 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="font-['JetBrains_Mono'] text-[13px] text-surface-variant">
-            © 2026 EPR Exchange India. SECURE TERMINAL v2.4.0
+            © 2026 Recyclink India
           </div>
-          <div className="flex gap-6 items-center">
-            <span className="flex items-center gap-2 font-['JetBrains_Mono'] text-[13px] text-primary">
-              <span className="w-2 h-2 rounded-full bg-primary inline-block" />
-              System Status: Operational
-            </span>
-            <span className="font-['JetBrains_Mono'] text-[13px] text-surface-variant">
-              UTC +5:30
-            </span>
-          </div>
+          <span className="flex items-center gap-2 font-['JetBrains_Mono'] text-[13px] text-primary">
+            <span className="w-2 h-2 rounded-full bg-primary inline-block" />
+            System Status: Operational
+          </span>
         </div>
       </div>
     </footer>

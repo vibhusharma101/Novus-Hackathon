@@ -28,7 +28,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "EPRx Exchange",
+  title: "Recyclink",
   description: "India's only zero-markup EPR credit exchange",
 };
 

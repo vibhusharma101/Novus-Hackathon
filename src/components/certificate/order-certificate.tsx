@@ -227,7 +227,7 @@ export function OrderCertificate({
                     <div className="flex items-center gap-2">
                       <ShieldCheck className="h-7 w-7 text-zinc-900" />
                       <h3 className="font-['Geist'] text-xl md:text-2xl font-extrabold uppercase tracking-tight text-zinc-900">
-                        EPRx Certificate
+                        Recyclink Certificate
                       </h3>
                     </div>
                     <p className="font-data text-[10px] text-zinc-500 uppercase tracking-widest">
@@ -281,7 +281,7 @@ export function OrderCertificate({
                   <div className="flex flex-col items-center gap-2 shrink-0">
                     <div className="w-32 h-14 border-b border-zinc-300 flex items-center justify-center">
                       <span className="font-['Geist'] text-2xl text-zinc-700 italic" style={{ fontFamily: 'cursive' }}>
-                        EPRx
+                        Recyclink
                       </span>
                     </div>
                     <span className="font-data text-[10px] text-zinc-400 uppercase tracking-widest">

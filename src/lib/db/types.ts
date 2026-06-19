@@ -50,6 +50,7 @@ export interface Listing {
   id: string
   recycler_id: string
   category: PlasticCategory
+  credit_type: 'recycling' | 'eol'
   qty_kg: number
   price_per_kg: number
   status: ListingStatus
