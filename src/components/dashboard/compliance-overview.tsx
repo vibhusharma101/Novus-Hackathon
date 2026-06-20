@@ -115,14 +115,19 @@ export function ComplianceDashboard({
   const router = useRouter()
 
   const totalLiabilityKg = liabilities.reduce((s, r) => s + r.liability_kg, 0)
-  const effectiveSecured = Math.min(creditsSecured, totalLiabilityKg)
-  const deficitKg = Math.max(0, totalLiabilityKg - creditsSecured)
-  const compliancePct =
-    totalLiabilityKg > 0 ? Math.round((effectiveSecured / totalLiabilityKg) * 100) : 0
 
   const liabilityByCategory = Object.fromEntries(
     liabilities.map(r => [r.category, r.liability_kg])
   ) as Partial<Record<PlasticCategory, number>>
+
+  const effectiveSecuredPerCat = CAT_ORDER.reduce((sum, cat) => {
+    const liability = liabilityByCategory[cat] ?? 0
+    const secured = creditsByCategory[cat] ?? 0
+    return sum + Math.min(secured, liability)
+  }, 0)
+  const deficitKg = Math.max(0, totalLiabilityKg - effectiveSecuredPerCat)
+  const compliancePct =
+    totalLiabilityKg > 0 ? Math.round((effectiveSecuredPerCat / totalLiabilityKg) * 100) : 0
 
   const urgent = daysRemaining <= 30
 
@@ -246,9 +251,9 @@ export function ComplianceDashboard({
               <span className="text-xs text-on-surface-variant uppercase tracking-wide">Credits Secured</span>
               <div className="text-right">
                 <span className="block font-data text-base font-semibold text-primary">
-                  {fmtKg(creditsSecured)}
+                  {fmtKg(effectiveSecuredPerCat)}
                 </span>
-                <span className="block font-data text-[10px] text-on-surface-variant">[{fmtMt(creditsSecured)}]</span>
+                <span className="block font-data text-[10px] text-on-surface-variant">[{fmtMt(effectiveSecuredPerCat)}]</span>
               </div>
             </div>
             <div className="flex justify-between items-center p-3 bg-error-container/30 border border-[--color-risk-red]/10 rounded">
