@@ -141,6 +141,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
         if (typeof pendo !== 'undefined') {
           pendo.track('listing_published', {
             category: category,
+            subcategory: subcategory,
             credit_type: creditType,
             qty_kg: qtyKg,
             qty_mt: parseFloat(qtyMt),
@@ -251,6 +252,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
                 <button
                   key={sub}
                   type="button"
+                  data-testid={`subcategory-${sub.replace('_', '-')}`}
                   onClick={() => setSubcategory(sub)}
                   className={cn(
                     'relative text-left border rounded-lg p-4 transition-all',
