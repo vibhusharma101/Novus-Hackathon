@@ -187,11 +187,13 @@
   animation: shake 0.2s ease-in-out 0s 2;
 }
 
-/* ── Print isolation: show only the element marked #cert-printable ─────────── */
+/* ── Print isolation: show only #cert-printable or #ledger-printable ──────── */
 @media print {
   body * { visibility: hidden; }
-  #cert-printable, #cert-printable * { visibility: visible; }
-  #cert-printable {
+  #cert-printable, #cert-printable *,
+  #ledger-printable, #ledger-printable * { visibility: visible; }
+  #cert-printable,
+  #ledger-printable {
     position: absolute;
     left: 0;
     top: 0;
@@ -199,6 +201,7 @@
     box-shadow: none !important;
     border-color: #18181b !important;
   }
+  .print\:hidden, .print\:\!hidden { display: none !important; }
 }
 
 /* ── Base ───────────────────────────────────────────────── */
