@@ -10,7 +10,8 @@ import {
 import { cn } from '@/lib/utils'
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser'
 import type { Listing, PublicRecycler } from '@/lib/db/types'
-import type { PlasticCategory } from '@/lib/epr/constants'
+import type { PlasticCategory, PlasticSubcategory } from '@/lib/epr/constants'
+import { SUBCATEGORY_LABELS } from '@/lib/epr/constants'
 import { INDIAN_STATES } from '@/lib/validators/buyer'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -447,7 +448,7 @@ export function OrderBook({
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Recycler Name</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Location</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Type</th>
-                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Credit</th>
+                    <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider">Subcategory</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-right">Qty (kg / MT)</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-right">Price / kg</th>
                     <th className="px-4 py-3 font-data text-[11px] text-on-surface-variant uppercase tracking-wider text-center">Action</th>
@@ -493,11 +494,11 @@ export function OrderBook({
                         </td>
                         <td className="px-4 py-3">
                           <span className={cn('px-2 py-0.5 rounded font-data text-[10px] font-bold border',
-                            (listing.credit_type ?? 'recycling') === 'eol'
+                            listing.subcategory === 'end_of_life'
                               ? 'bg-amber-50 text-amber-700 border-amber-200'
                               : 'bg-success-emerald-light text-primary border-primary/20'
                           )}>
-                            {(listing.credit_type ?? 'recycling') === 'eol' ? 'EoL' : 'Recycling'}
+                            {listing.subcategory ? SUBCATEGORY_LABELS[listing.subcategory] : '—'}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right tabular-nums">

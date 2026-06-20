@@ -53,22 +53,30 @@ create table if not exists liabilities (
   id              uuid primary key default gen_random_uuid(),
   brand_id        uuid not null references brands(id) on delete cascade,
   category        text not null check (category in ('rigid', 'flexible', 'mlp')),
+  subcategory     text not null default 'recycling' check (subcategory in ('recycling', 'end_of_life')),
   market_kg       numeric not null,
   target_pct      numeric not null,
   liability_kg    numeric not null,
   unique (brand_id, category)
 );
 
+-- Backfill for databases created before subcategory existed (idempotent).
+alter table liabilities add column if not exists subcategory text not null default 'recycling' check (subcategory in ('recycling', 'end_of_life'));
+
 -- Recycler credit listings
 create table if not exists listings (
   id              uuid primary key default gen_random_uuid(),
   recycler_id     uuid not null references recyclers(id) on delete cascade,
   category        text not null check (category in ('rigid', 'flexible', 'mlp')),
+  subcategory     text not null default 'recycling' check (subcategory in ('recycling', 'end_of_life')),
   qty_kg          numeric not null check (qty_kg > 0),
   price_per_kg    numeric not null check (price_per_kg > 0),
   status          text not null default 'active' check (status in ('active', 'partial', 'sold')),
   created_at      timestamptz not null default now()
 );
+
+-- Backfill for databases created before subcategory existed (idempotent).
+alter table listings add column if not exists subcategory text not null default 'recycling' check (subcategory in ('recycling', 'end_of_life'));
 
 -- Orders (buyer purchases a listing)
 -- buyer_gstin / buyer_company_name are denormalized from brands at order time so
@@ -81,6 +89,7 @@ create table if not exists orders (
   recycler_id         uuid not null references recyclers(id) on delete cascade,
   listing_id          uuid not null references listings(id) on delete cascade,
   category            text not null check (category in ('rigid', 'flexible', 'mlp')),
+  subcategory         text default 'recycling' check (subcategory in ('recycling', 'end_of_life')),
   qty_kg              numeric not null,
   price_per_kg        numeric not null,
   credits_cost        numeric not null,
@@ -96,6 +105,7 @@ create table if not exists orders (
 -- Backfill for databases created before the denormalized buyer fields existed.
 alter table orders add column if not exists buyer_gstin        text;
 alter table orders add column if not exists buyer_company_name text;
+alter table orders add column if not exists subcategory        text default 'recycling' check (subcategory in ('recycling', 'end_of_life'));
 
 -- Backfill: credit_type on listings (recycling vs end-of-life credits).
 alter table listings add column if not exists credit_type text not null default 'recycling'

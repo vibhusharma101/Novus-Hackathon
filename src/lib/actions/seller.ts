@@ -60,6 +60,7 @@ export async function createListing(input: ListingInput): Promise<CreateListingR
     .insert({
       recycler_id:  session.recyclerId,
       category:     parsed.data.category,
+      subcategory:  parsed.data.subcategory ?? 'recycling',
       qty_kg:       parsed.data.qty_kg,
       price_per_kg: parsed.data.price_per_kg,
       credit_type:  parsed.data.credit_type ?? 'recycling',
