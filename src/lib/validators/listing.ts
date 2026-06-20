@@ -8,6 +8,7 @@ export const LISTING_MAX_PRICE = 100_000
 
 export const listingSchema = z.object({
   category: z.enum(['rigid', 'flexible', 'mlp']),
+  subcategory: z.enum(['recycling', 'end_of_life']).optional(),
   qty_kg: z
     .number()
     .positive('Enter a quantity greater than 0')

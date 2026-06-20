@@ -9,9 +9,9 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createListing } from '@/lib/actions/seller'
-import { PLATFORM_FEE_PCT } from '@/lib/epr/constants'
+import { PLATFORM_FEE_PCT, PLASTIC_SUBCATEGORIES, SUBCATEGORY_LABELS } from '@/lib/epr/constants'
 import { LISTING_MIN_KG, LISTING_MAX_KG } from '@/lib/validators/listing'
-import type { PlasticCategory } from '@/lib/epr/constants'
+import type { PlasticCategory, PlasticSubcategory } from '@/lib/epr/constants'
 import type { MarketStat } from '@/app/seller/(portal)/listings/new/page'
 
 // ─── Meta ─────────────────────────────────────────────────────────────────────
@@ -40,6 +40,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
   const [isPending, startTransition] = useTransition()
 
   const [category, setCategory] = useState<PlasticCategory>('rigid')
+  const [subcategory, setSubcategory] = useState<PlasticSubcategory>('recycling')
   const [creditType, setCreditType] = useState<'recycling' | 'eol'>('recycling')
   const [qtyMt, setQtyMt] = useState('')
   const [price, setPrice] = useState('')
@@ -135,7 +136,7 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
       return
     }
     startTransition(async () => {
-      const result = await createListing({ category, qty_kg: qtyKg, price_per_kg: priceNum, credit_type: creditType })
+      const result = await createListing({ category, subcategory, qty_kg: qtyKg, price_per_kg: priceNum, credit_type: creditType })
       if (result.ok) {
         if (typeof pendo !== 'undefined') {
           pendo.track('listing_published', {
@@ -240,10 +241,37 @@ export function CreateListingForm({ companyName, state, verified, marketStats }:
             </div>
           </div>
 
+          {/* Subcategory */}
+          <div className="bg-surface-container-lowest border border-[--color-border-zinc] p-6 rounded-lg">
+            <h3 className="font-['Geist'] text-base font-semibold mb-5 flex items-center gap-2">
+              <span className="text-primary">02.</span> Select Subcategory
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              {PLASTIC_SUBCATEGORIES.map(sub => (
+                <button
+                  key={sub}
+                  type="button"
+                  onClick={() => setSubcategory(sub)}
+                  className={cn(
+                    'relative text-left border rounded-lg p-4 transition-all',
+                    subcategory === sub
+                      ? 'border-primary bg-primary-container/5 ring-1 ring-primary'
+                      : 'border-[--color-border-zinc] hover:border-primary',
+                  )}
+                >
+                  <div className="font-['Geist'] text-sm font-bold">{SUBCATEGORY_LABELS[sub]}</div>
+                  {subcategory === sub && (
+                    <CheckCircle2 className="absolute top-2 right-2 h-5 w-5 text-primary" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Volume & Pricing */}
           <div className="bg-surface-container-lowest border border-[--color-border-zinc] p-6 rounded-lg">
             <h3 className="font-['Geist'] text-base font-semibold mb-5 flex items-center gap-2">
-              <span className="text-primary">02.</span> Volume &amp; Pricing
+              <span className="text-primary">03.</span> Volume &amp; Pricing
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">

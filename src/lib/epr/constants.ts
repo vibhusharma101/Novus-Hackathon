@@ -1,6 +1,14 @@
 export const PLASTIC_CATEGORIES = ['rigid', 'flexible', 'mlp'] as const
 export type PlasticCategory = typeof PLASTIC_CATEGORIES[number]
 
+export const PLASTIC_SUBCATEGORIES = ['recycling', 'end_of_life'] as const
+export type PlasticSubcategory = typeof PLASTIC_SUBCATEGORIES[number]
+
+export const SUBCATEGORY_LABELS: Record<PlasticSubcategory, string> = {
+  recycling: 'Recycling',
+  end_of_life: 'End of Life',
+}
+
 export const TARGET_PCT: Record<PlasticCategory, number> = {
   rigid: 0.30,
   flexible: 0.20,

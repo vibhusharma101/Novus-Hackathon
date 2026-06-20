@@ -16,8 +16,10 @@ export default async function DashboardPage() {
 
   const supabase = await createUserClient()
 
-  const [{ data: brand }, { data: liabilities }, { data: transferredOrders }, { data: recentOrders }] = await Promise.all([
-    supabaseAdmin.from('brands').select('company_name').eq('clerk_user_id', userId).maybeSingle(),
+  const { data: brand } = await supabaseAdmin.from('brands').select('company_name').eq('clerk_user_id', userId).maybeSingle()
+  if (!brand) redirect('/onboarding/buyer')
+
+  const [{ data: liabilities }, { data: transferredOrders }, { data: recentOrders }] = await Promise.all([
     supabase.from('liabilities').select('category, liability_kg'),
     supabase.from('orders').select('qty_kg, category').eq('status', 'transferred'),
     supabase

@@ -1,4 +1,4 @@
-import type { PlasticCategory } from '@/lib/epr/constants'
+import type { PlasticCategory, PlasticSubcategory } from '@/lib/epr/constants'
 
 export type OrderStatus = 'pending' | 'transferred' | 'declined' | 'expired'
 export type ListingStatus = 'active' | 'partial' | 'sold'
@@ -41,6 +41,7 @@ export interface Liability {
   id: string
   brand_id: string
   category: PlasticCategory
+  subcategory: PlasticSubcategory
   market_kg: number
   target_pct: number
   liability_kg: number
@@ -50,6 +51,7 @@ export interface Listing {
   id: string
   recycler_id: string
   category: PlasticCategory
+  subcategory: PlasticSubcategory | null
   credit_type: 'recycling' | 'eol'
   qty_kg: number
   price_per_kg: number
@@ -65,6 +67,7 @@ export interface Order {
   recycler_id: string
   listing_id: string
   category: PlasticCategory
+  subcategory: PlasticSubcategory | null
   qty_kg: number
   price_per_kg: number
   credits_cost: number
