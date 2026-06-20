@@ -289,116 +289,89 @@ export function OrderBook({
       {/* ── Filter bar ── */}
       <div className="sticky top-0 z-20 bg-surface-container-lowest border-b border-[--color-border-zinc] px-6 py-2">
         {/* Desktop filter row */}
-        <div className="hidden md:flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
-              {(['all', 'rigid', 'flexible', 'mlp'] as const).map(cat => (
-                <button
-                  key={cat}
-                  type="button"
-                  onClick={() => { setCatFilter(cat); setPage(1) }}
-                  className={cn(
-                    'px-4 py-1.5 rounded font-data text-sm transition-colors capitalize',
-                    catFilter === cat
-                      ? 'bg-surface-container-lowest text-primary shadow-sm font-semibold'
-                      : 'text-on-surface-variant hover:bg-surface-container-high'
-                  )}
-                >
-                  {cat === 'all' ? 'All' : CAT_LABELS[cat].label}
-                </button>
-              ))}
-            </div>
-            <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg">
-              {([['all', 'All Credits'], ['recycling', 'Recycling'], ['eol', 'End-of-Life']] as const).map(([type, label]) => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => { setCreditFilter(type); setPage(1) }}
-                  className={cn(
-                    'px-3 py-1.5 rounded font-data text-sm transition-colors',
-                    creditFilter === type
-                      ? 'bg-surface-container-lowest text-primary shadow-sm font-semibold'
-                      : 'text-on-surface-variant hover:bg-surface-container-high'
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+        <div className="hidden md:flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <label className="font-data text-[11px] text-on-surface-variant">Category:</label>
+            <select
+              value={catFilter}
+              onChange={e => { setCatFilter(e.target.value as typeof catFilter); setPage(1) }}
+              className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="all">All Categories</option>
+              <option value="rigid">Rigid</option>
+              <option value="flexible">Flexible</option>
+              <option value="mlp">MLP</option>
+            </select>
           </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <label className="font-data text-[11px] text-on-surface-variant">State:</label>
-              <select
-                value={stateFilter}
-                onChange={e => { setStateFilter(e.target.value); setPage(1) }}
-                className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
-              >
-                <option value="all">All States</option>
-                {availableStates.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <ArrowUpDown className="h-3.5 w-3.5 text-on-surface-variant" />
-              <select
-                value={sortBy}
-                onChange={e => { setSortBy(e.target.value as typeof sortBy); setPage(1) }}
-                className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
-              >
-                <option value="price_asc">Price: Low → High</option>
-                <option value="price_desc">Price: High → Low</option>
-                <option value="qty_desc">Qty: Large → Small</option>
-                <option value="latest">Latest Listings</option>
-              </select>
-            </div>
-            {hasFilters && (
-              <button
-                type="button"
-                onClick={clearFilters}
-                className="flex items-center gap-1 text-primary font-data text-sm hover:underline"
-              >
-                <X className="h-3.5 w-3.5" />
-                Clear
-              </button>
-            )}
+          <div className="flex items-center gap-2">
+            <label className="font-data text-[11px] text-on-surface-variant">Credit:</label>
+            <select
+              value={creditFilter}
+              onChange={e => { setCreditFilter(e.target.value as typeof creditFilter); setPage(1) }}
+              className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="all">All Credits</option>
+              <option value="recycling">Recycling</option>
+              <option value="eol">End-of-Life</option>
+            </select>
           </div>
+          <div className="flex items-center gap-2">
+            <label className="font-data text-[11px] text-on-surface-variant">State:</label>
+            <select
+              value={stateFilter}
+              onChange={e => { setStateFilter(e.target.value); setPage(1) }}
+              className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="all">All States</option>
+              {availableStates.map(s => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <ArrowUpDown className="h-3.5 w-3.5 text-on-surface-variant" />
+            <select
+              value={sortBy}
+              onChange={e => { setSortBy(e.target.value as typeof sortBy); setPage(1) }}
+              className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="price_asc">Price: Low → High</option>
+              <option value="price_desc">Price: High → Low</option>
+              <option value="qty_desc">Qty: Large → Small</option>
+              <option value="latest">Latest Listings</option>
+            </select>
+          </div>
+          {hasFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex items-center gap-1 text-primary font-data text-sm hover:underline"
+            >
+              <X className="h-3.5 w-3.5" />
+              Clear
+            </button>
+          )}
         </div>
 
-        {/* Mobile filter chips */}
+        {/* Mobile filter row */}
         <div className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar py-1">
-          {(['all', 'rigid', 'flexible', 'mlp'] as const).map(cat => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => { setCatFilter(cat); setPage(1) }}
-              className={cn(
-                'shrink-0 px-4 py-1.5 rounded-full font-data text-sm transition-colors capitalize',
-                catFilter === cat
-                  ? 'bg-primary-container text-on-primary-container font-semibold'
-                  : 'border border-[--color-border-zinc] text-on-surface-variant hover:bg-surface-container-low'
-              )}
-            >
-              {cat === 'all' ? 'All' : CAT_LABELS[cat].label}
-            </button>
-          ))}
-          <div className="h-5 w-px bg-[--color-border-zinc] shrink-0 mx-1" />
-          {([['all', 'All Credits'], ['recycling', 'Recycling'], ['eol', 'EoL']] as const).map(([type, label]) => (
-            <button
-              key={type}
-              type="button"
-              onClick={() => { setCreditFilter(type); setPage(1) }}
-              className={cn(
-                'shrink-0 px-3 py-1.5 rounded-full font-data text-sm transition-colors',
-                creditFilter === type
-                  ? 'bg-primary-container text-on-primary-container font-semibold'
-                  : 'border border-[--color-border-zinc] text-on-surface-variant hover:bg-surface-container-low'
-              )}
-            >
-              {label}
-            </button>
-          ))}
-          <div className="h-5 w-px bg-[--color-border-zinc] shrink-0 mx-1" />
+          <select
+            value={catFilter}
+            onChange={e => { setCatFilter(e.target.value as typeof catFilter); setPage(1) }}
+            className="shrink-0 bg-surface-container-lowest border border-[--color-border-zinc] rounded-full font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
+          >
+            <option value="all">All Categories</option>
+            <option value="rigid">Rigid</option>
+            <option value="flexible">Flexible</option>
+            <option value="mlp">MLP</option>
+          </select>
+          <select
+            value={creditFilter}
+            onChange={e => { setCreditFilter(e.target.value as typeof creditFilter); setPage(1) }}
+            className="shrink-0 bg-surface-container-lowest border border-[--color-border-zinc] rounded-full font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
+          >
+            <option value="all">All Credits</option>
+            <option value="recycling">Recycling</option>
+            <option value="eol">End-of-Life</option>
+          </select>
           <button
             type="button"
             onClick={() => setMobileSheetOpen(true)}
