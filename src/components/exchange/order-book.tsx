@@ -44,7 +44,7 @@ const fmtMt = (kg: number) => `${(kg / 1000).toFixed(2)} MT`
 
 // ─── Deficit cards ────────────────────────────────────────────────────────────
 
-function DeficitCards({ liabilities }: { liabilities: DeficitRow[] }) {
+function DeficitCards({ liabilities, creditsByCategory }: { liabilities: DeficitRow[]; creditsByCategory: Record<string, number> }) {
   const byCategory = Object.fromEntries(
     liabilities.map(r => [r.category, r.liability_kg])
   ) as Partial<Record<PlasticCategory, number>>
@@ -63,7 +63,7 @@ function DeficitCards({ liabilities }: { liabilities: DeficitRow[] }) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {CAT_ORDER.map(cat => {
           const liabilityKg = byCategory[cat] ?? 0
-          const securedKg = 0
+          const securedKg = Math.min(creditsByCategory[cat] ?? 0, liabilityKg)
           const securedPct = liabilityKg > 0 ? Math.round((securedKg / liabilityKg) * 100) : 0
           const remainingPct = 100 - securedPct
           return (
@@ -82,13 +82,17 @@ function DeficitCards({ liabilities }: { liabilities: DeficitRow[] }) {
               <div className="flex items-end justify-between mb-3">
                 <div>
                   <p className="font-data text-base font-semibold text-on-surface">
-                    {liabilityKg > 0 ? fmtKg(liabilityKg) : '—'}
+                    {liabilityKg > 0 ? fmtKg(liabilityKg - securedKg) : '—'}
                   </p>
                   <p className="text-xs text-on-surface-variant">Remaining Deficit</p>
                 </div>
                 {liabilityKg > 0 && (
-                  <span className="font-data text-[11px] text-[--color-risk-red] bg-error-container/20 px-2 py-0.5 rounded">
-                    {remainingPct}% REMAINING
+                  <span className={cn('font-data text-[11px] px-2 py-0.5 rounded',
+                    remainingPct > 0
+                      ? 'text-[--color-risk-red] bg-error-container/20'
+                      : 'text-primary bg-success-emerald-light'
+                  )}>
+                    {remainingPct > 0 ? `${remainingPct}% REMAINING` : 'FULFILLED'}
                   </span>
                 )}
               </div>
@@ -139,9 +143,11 @@ const PAGE_SIZE = 10
 export function OrderBook({
   initialListings,
   liabilities,
+  creditsByCategory = {},
 }: {
   initialListings: ListingWithRecycler[]
   liabilities: DeficitRow[]
+  creditsByCategory?: Record<string, number>
 }) {
   const router = useRouter()
   const { getToken } = useAuth()
@@ -284,7 +290,7 @@ export function OrderBook({
     <div className="-m-6 flex flex-col min-h-full bg-background">
 
       {/* ── Deficit summary ── */}
-      <DeficitCards liabilities={liabilities} />
+      <DeficitCards liabilities={liabilities} creditsByCategory={creditsByCategory} />
 
       {/* ── Filter bar ── */}
       <div className="sticky top-0 z-20 bg-surface-container-lowest border-b border-[--color-border-zinc] px-6 py-2">
