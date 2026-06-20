@@ -299,6 +299,7 @@ export function OrderBook({
           <div className="flex items-center gap-2">
             <label className="font-data text-[11px] text-on-surface-variant">Category:</label>
             <select
+              data-testid="exchange-category-filter"
               value={catFilter}
               onChange={e => { setCatFilter(e.target.value as typeof catFilter); setPage(1) }}
               className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
@@ -312,6 +313,7 @@ export function OrderBook({
           <div className="flex items-center gap-2">
             <label className="font-data text-[11px] text-on-surface-variant">Credit:</label>
             <select
+              data-testid="exchange-credit-type-filter"
               value={creditFilter}
               onChange={e => { setCreditFilter(e.target.value as typeof creditFilter); setPage(1) }}
               className="bg-surface-container-lowest border border-[--color-border-zinc] rounded font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
@@ -360,6 +362,7 @@ export function OrderBook({
         {/* Mobile filter row */}
         <div className="md:hidden flex items-center gap-2 overflow-x-auto hide-scrollbar py-1">
           <select
+            data-testid="exchange-category-filter"
             value={catFilter}
             onChange={e => { setCatFilter(e.target.value as typeof catFilter); setPage(1) }}
             className="shrink-0 bg-surface-container-lowest border border-[--color-border-zinc] rounded-full font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
@@ -370,6 +373,7 @@ export function OrderBook({
             <option value="mlp">MLP</option>
           </select>
           <select
+            data-testid="exchange-credit-type-filter"
             value={creditFilter}
             onChange={e => { setCreditFilter(e.target.value as typeof creditFilter); setPage(1) }}
             className="shrink-0 bg-surface-container-lowest border border-[--color-border-zinc] rounded-full font-data text-sm px-3 py-1.5 focus:ring-1 focus:ring-primary outline-none"
