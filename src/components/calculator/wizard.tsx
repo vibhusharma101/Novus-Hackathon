@@ -773,9 +773,9 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
   }, [])
 
   return (
-    <div>
+    <div id="ledger-printable">
       {/* Desktop progress header */}
-      <div className="hidden md:block mb-6">
+      <div className="hidden md:block mb-6 print:hidden">
         <div className="flex justify-between items-end mb-4">
           <div>
             <span className="font-data text-[11px] text-primary uppercase tracking-widest block mb-1">
@@ -800,7 +800,7 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
       </div>
 
       {/* Mobile header */}
-      <div className="md:hidden mb-6">
+      <div className="md:hidden mb-6 print:hidden">
         <div className="flex justify-between items-center mb-1">
           <h1 className="text-2xl font-['Geist'] font-semibold tracking-tight text-on-surface">Results Ledger</h1>
           <span className="font-data text-[11px] text-primary px-3 py-1 bg-success-emerald-light rounded-full font-semibold">
@@ -987,7 +987,7 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
       </p>
 
       {/* Desktop action bar */}
-      <div className="hidden md:flex border-t border-[--color-border-zinc] pt-6 items-center justify-between gap-4">
+      <div className="hidden md:flex print:!hidden border-t border-[--color-border-zinc] pt-6 items-center justify-between gap-4">
         <button
           type="button"
           onClick={onBack}
@@ -1016,7 +1016,7 @@ function Step3({ selected, weights, onBack, onGoToExchange }: Step3Props) {
       </div>
 
       {/* Mobile sticky action bar */}
-      <div className="md:hidden sticky bottom-0 -mx-6 -mb-6 bg-surface/90 backdrop-blur-md border-t border-[--color-border-zinc] p-4 flex gap-3">
+      <div className="md:hidden print:!hidden sticky bottom-0 -mx-6 -mb-6 bg-surface/90 backdrop-blur-md border-t border-[--color-border-zinc] p-4 flex gap-3">
         <button
           type="button"
           onClick={onBack}
