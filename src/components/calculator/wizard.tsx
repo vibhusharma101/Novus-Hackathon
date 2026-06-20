@@ -10,7 +10,8 @@ import {
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { calculateLiability, estimateCostRange } from '@/lib/epr/liability'
-import type { PlasticCategory } from '@/lib/epr/constants'
+import type { PlasticCategory, PlasticSubcategory } from '@/lib/epr/constants'
+import { SUBCATEGORY_LABELS, PLASTIC_SUBCATEGORIES } from '@/lib/epr/constants'
 import { saveLiabilities } from '@/lib/actions/buyer'
 import { AiEstimator } from '@/components/calculator/ai-estimator'
 
@@ -304,12 +305,14 @@ function Step1({ selected, onToggle, onEstimate, onNext, onCancel, clock }: Step
 interface Step2Props {
   selected: Set<PlasticCategory>
   weights: Record<PlasticCategory, string>
+  subcategories: Record<PlasticCategory, PlasticSubcategory>
   onWeightChange: (cat: PlasticCategory, val: string) => void
+  onSubcategoryChange: (cat: PlasticCategory, val: PlasticSubcategory) => void
   onNext: () => void
   onBack: () => void
 }
 
-function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props) {
+function Step2({ selected, weights, subcategories, onWeightChange, onSubcategoryChange, onNext, onBack }: Step2Props) {
   const [isPending, startTransition] = useTransition()
 
   const selectedCats = CATEGORIES.filter(c => selected.has(c.id))
@@ -335,6 +338,7 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
     }
     const items = selectedCats.map(c => ({
       category: c.id,
+      subcategory: subcategories[c.id],
       market_kg: parseFloat(weights[c.id]),
     }))
     startTransition(async () => {
@@ -429,6 +433,9 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
                     Plastic Category
                   </th>
                   <th className="px-6 py-3 text-left font-data text-[11px] text-on-surface-variant uppercase tracking-wider">
+                    Subcategory
+                  </th>
+                  <th className="px-6 py-3 text-left font-data text-[11px] text-on-surface-variant uppercase tracking-wider">
                     HS Code
                   </th>
                   <th className="px-6 py-3 text-right font-data text-[11px] text-on-surface-variant uppercase tracking-wider">
@@ -444,6 +451,17 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
                         <span className="text-sm font-semibold text-on-surface">{cat.label}</span>
                         <span className="font-data text-[11px] text-on-surface-variant">{cat.tableSubtitle}</span>
                       </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={subcategories[cat.id]}
+                        onChange={e => onSubcategoryChange(cat.id, e.target.value as PlasticSubcategory)}
+                        className="w-36 font-data text-sm border border-[--color-border-zinc] rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-white transition-all"
+                      >
+                        {PLASTIC_SUBCATEGORIES.map(sub => (
+                          <option key={sub} value={sub}>{SUBCATEGORY_LABELS[sub]}</option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-6 py-4 font-data text-sm text-on-surface-variant">{cat.hsCode}</td>
                     <td className="px-6 py-4 text-right">
@@ -626,6 +644,21 @@ function Step2({ selected, weights, onWeightChange, onNext, onBack }: Step2Props
                   <span className="font-data text-[11px] text-on-surface-variant uppercase tracking-wider">{cat.cat}</span>
                 </div>
                 <Icon className="h-5 w-5 text-on-surface-variant" />
+              </div>
+              {/* Subcategory dropdown */}
+              <div>
+                <label className="block font-data text-[11px] text-on-surface-variant mb-1.5">
+                  Subcategory
+                </label>
+                <select
+                  value={subcategories[cat.id]}
+                  onChange={e => onSubcategoryChange(cat.id, e.target.value as PlasticSubcategory)}
+                  className="w-full h-10 bg-surface-container-low border border-[--color-border-zinc] focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary rounded-lg px-4 font-data text-sm transition-all"
+                >
+                  {PLASTIC_SUBCATEGORIES.map(sub => (
+                    <option key={sub} value={sub}>{SUBCATEGORY_LABELS[sub]}</option>
+                  ))}
+                </select>
               </div>
               {/* Floating label input */}
               <div className="relative">
@@ -1015,6 +1048,11 @@ export function CalculatorWizard() {
     flexible: '',
     mlp: '',
   })
+  const [subcategories, setSubcategories] = useState<Record<PlasticCategory, PlasticSubcategory>>({
+    rigid: 'recycling',
+    flexible: 'recycling',
+    mlp: 'recycling',
+  })
   const [clock, setClock] = useState('')
 
   useEffect(() => {
@@ -1034,6 +1072,10 @@ export function CalculatorWizard() {
 
   function setWeight(cat: PlasticCategory, val: string) {
     setWeights(prev => ({ ...prev, [cat]: val }))
+  }
+
+  function setSubcategory(cat: PlasticCategory, val: PlasticSubcategory) {
+    setSubcategories(prev => ({ ...prev, [cat]: val }))
   }
 
   // Applies an AI estimate: selects every category with a positive estimate,
@@ -1070,7 +1112,9 @@ export function CalculatorWizard() {
       <Step2
         selected={selected}
         weights={weights}
+        subcategories={subcategories}
         onWeightChange={setWeight}
+        onSubcategoryChange={setSubcategory}
         onNext={() => setStep(3)}
         onBack={() => setStep(1)}
       />

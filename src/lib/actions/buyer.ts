@@ -4,8 +4,8 @@ import { auth } from '@clerk/nextjs/server'
 import { createUserClient, supabaseAdmin } from '@/lib/supabase'
 import { buyerProfileSchema, type BuyerProfileInput } from '@/lib/validators/buyer'
 import { calculateLiability } from '@/lib/epr/liability'
-import { TARGET_PCT, PLASTIC_CATEGORIES, PLATFORM_FEE_PCT, ORDER_EXPIRY_HOURS } from '@/lib/epr/constants'
-import type { PlasticCategory } from '@/lib/epr/constants'
+import { TARGET_PCT, PLASTIC_CATEGORIES, PLASTIC_SUBCATEGORIES, PLATFORM_FEE_PCT, ORDER_EXPIRY_HOURS } from '@/lib/epr/constants'
+import type { PlasticCategory, PlasticSubcategory } from '@/lib/epr/constants'
 
 export type CreateBrandResult =
   | { ok: true }
@@ -53,7 +53,7 @@ export async function createBrandProfile(input: BuyerProfileInput): Promise<Crea
 export type SaveLiabilitiesResult = { ok: true } | { ok: false; error: string }
 
 export async function saveLiabilities(
-  items: { category: PlasticCategory; market_kg: number }[]
+  items: { category: PlasticCategory; subcategory: PlasticSubcategory; market_kg: number }[]
 ): Promise<SaveLiabilitiesResult> {
   const { userId } = await auth()
   if (!userId) return { ok: false, error: 'You must be signed in.' }
@@ -63,7 +63,7 @@ export async function saveLiabilities(
     return { ok: false, error: 'Invalid liability data.' }
   }
   for (const item of items) {
-    if (!PLASTIC_CATEGORIES.includes(item.category) || item.market_kg <= 0) {
+    if (!PLASTIC_CATEGORIES.includes(item.category) || !PLASTIC_SUBCATEGORIES.includes(item.subcategory) || item.market_kg <= 0) {
       return { ok: false, error: 'Invalid liability data.' }
     }
   }
@@ -83,6 +83,7 @@ export async function saveLiabilities(
   const rows = items.map(item => ({
     brand_id: brand.id,
     category: item.category,
+    subcategory: item.subcategory,
     market_kg: item.market_kg,
     target_pct: TARGET_PCT[item.category],
     liability_kg: calculateLiability(item.category, item.market_kg),

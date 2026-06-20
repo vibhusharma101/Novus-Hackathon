@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
 import { Lock } from 'lucide-react'
+import { createUserClient } from '@/lib/supabase'
 import { BuyerOnboardingForm } from '@/components/onboarding/buyer-form'
 
 export const metadata: Metadata = {
@@ -14,6 +15,10 @@ export const metadata: Metadata = {
 export default async function BuyerOnboardingPage() {
   const { userId } = await auth()
   if (!userId) redirect('/sign-in')
+
+  const supabase = await createUserClient()
+  const { data: brand } = await supabase.from('brands').select('id').maybeSingle()
+  if (brand) redirect('/dashboard')
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
